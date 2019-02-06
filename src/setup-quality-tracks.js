@@ -1,0 +1,60 @@
+function _getQuality(player, shaka) {
+
+  var tracks = [],
+    levels = shaka.getVariantTracks().filter(function(t) {
+      return t.type === 'variant'
+    });
+
+  if (levels.length > 1) {
+
+    var autoLevel = {
+      id: -1,
+      label: 'auto',
+      selected: true
+    };
+
+    tracks.push(autoLevel);
+  }
+
+  levels.forEach(function(level, index) {
+
+    var track = level;
+
+    track.label = level.height + 'p (' + ((level.bandwidth / 1000).toFixed(0)) + 'k)';
+
+    tracks.push(track);
+  });
+
+  return tracks;
+}
+
+export default function setupQualityTracks(player, shaka) {
+
+  var me = this;
+
+  player.trigger('loadedqualitydata', {
+    qualityData: {
+      video: _getQuality(player, shaka)
+    },
+    qualitySwitchCallback: function(id, type) {
+
+      // Update the adaptation.
+      shaka.configure({
+        abr: {
+          enabled: id === -1
+        }
+      });
+
+      // Is auto?
+      if (id === -1) return;
+
+      var tracks = shaka.getVariantTracks().filter(function(t) {
+        return t.id === id && t.type === 'variant'
+      });
+
+      shaka.selectVariantTrack(tracks[0], /* clearBuffer */ true);
+    }
+  });
+}
+
+

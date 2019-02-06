@@ -1,4 +1,5 @@
 import videojs from 'video.js';
+import setupQualityTracks from './setup-quality-tracks';
 import {version as VERSION} from '../package.json';
 
 const Tech = videojs.getTech('Tech');
@@ -68,7 +69,8 @@ class Shaka extends Html5 {
     var me = this;
 
     this.shaka_.load(src).then(function() {
-      me._initQuality()
+      //setupQualityTracks(me.player_, me.shaka_);
+      me.initShakaMenus();
     });
   }
 
@@ -80,64 +82,10 @@ class Shaka extends Html5 {
     return Html5.prototype.dispose.apply(this);
   }
 
-  _initQuality() {
-
-    var me = this;
-
-    this.player_.trigger('loadedqualitydata', {
-      qualityData: {
-        video: me._getQuality()
-      },
-      qualitySwitchCallback: function(id, type) {
-
-        // Update the adaptation.
-        me.shaka_.configure({
-          abr: {
-            enabled: id === -1
-          }
-        });
-
-        // Is auto?
-        if (id === -1) return;
-
-        var tracks = me.shaka_.getVariantTracks().filter(function(t) {
-          return t.id === id && t.type === 'variant'
-        });
-
-        me.shaka_.selectVariantTrack(tracks[0], /* clearBuffer */ true);
-      }
-    });
+  initShakaMenus() {
+    setupQualityTracks(this.player_, this.shaka_);
   }
 
-  _getQuality() {
-
-    var tracks = [],
-      levels = this.shaka_.getVariantTracks().filter(function(t) {
-        return t.type === 'variant'
-      });
-
-    if (levels.length > 1) {
-
-      var autoLevel = {
-        id: -1,
-        label: 'auto',
-        selected: true
-      };
-
-      tracks.push(autoLevel);
-    }
-
-    levels.forEach(function(level, index) {
-
-      var track = level;
-
-      track.label = level.height + 'p (' + ((level.bandwidth / 1000).toFixed(0)) + 'k)';
-
-      tracks.push(track);
-    });
-
-    return tracks;
-  }
 }
 
 // Define default values for the plugin's `state` object here.
