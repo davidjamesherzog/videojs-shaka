@@ -56,5 +56,3 @@ export default function setupQualityTracks(player, shaka) {
     }
   });
 }
-
-

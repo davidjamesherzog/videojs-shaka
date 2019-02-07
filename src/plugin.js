@@ -1,5 +1,7 @@
 import videojs from 'video.js';
 import setupQualityTracks from './setup-quality-tracks';
+import setupTextTracks from './setup-text-tracks';
+import setupAudioTracks from './setup-audio-tracks';
 import {version as VERSION} from '../package.json';
 
 const Tech = videojs.getTech('Tech');
@@ -69,7 +71,6 @@ class Shaka extends Html5 {
     var me = this;
 
     this.shaka_.load(src).then(function() {
-      //setupQualityTracks(me.player_, me.shaka_);
       me.initShakaMenus();
     });
   }
@@ -84,6 +85,8 @@ class Shaka extends Html5 {
 
   initShakaMenus() {
     setupQualityTracks(this.player_, this.shaka_);
+    setupTextTracks(this.player_, this.shaka_);
+    setupAudioTracks(this.player_, this.shaka_);
   }
 
 }
