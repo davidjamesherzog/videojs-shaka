@@ -90,10 +90,10 @@ function attachDashTextTracksToVideojs(player, shaka, tracks) {
   player.textTracks().on('change', updateActiveDashTextTrack);
 
   // Cleanup event listeners whenever we start loading a new source
-  /* shaka.addEventListener('ended', () => {
+  shaka.addEventListener('unloading', () => {
     console.log('ended, turning off change subtitles event');
     player.textTracks().off('change', updateActiveDashTextTrack);
-  }); */
+  });
 
   // Initialize the text track on our first run-through
   updateActiveDashTextTrack();

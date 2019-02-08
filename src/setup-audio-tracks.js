@@ -9,7 +9,7 @@ import videojs from 'video.js';
  * @param {videojs} player the videojs player instance
  * @param {videojs.tech} tech the videojs tech being used
  */
-function handleAudioTracksAdded(player, shaka, tracks) {
+function handleAudioTracksAdded(player, tech, shaka, tracks) {
 
   const videojsAudioTracks = player.audioTracks();
 
@@ -74,15 +74,16 @@ function handleAudioTracksAdded(player, shaka, tracks) {
   };
 
   videojsAudioTracks.addEventListener('change', audioTracksChangeHandler);
-  /* player.dash.mediaPlayer.on(dashjs.MediaPlayer.events.STREAM_TEARDOWN_COMPLETE, () => {
+  shaka.addEventListener('unloading', () => {
+    console.log('ended, turning off change audio event');
     videojsAudioTracks.removeEventListener('change', audioTracksChangeHandler);
-  }); */
+  });
 }
 
 /*
  * Call `handlePlaybackMetadataLoaded` when `mediaPlayer` emits
  * `dashjs.MediaPlayer.events.PLAYBACK_METADATA_LOADED`.
  */
-export default function setupAudioTracks(player, shaka) {
-  handleAudioTracksAdded(player, shaka, shaka.getAudioLanguagesAndRoles());
+export default function setupAudioTracks(player, tech, shaka) {
+  handleAudioTracksAdded(player, tech, shaka, shaka.getAudioLanguagesAndRoles());
 }
