@@ -1,13 +1,13 @@
 function _getQuality(player, shaka) {
 
-  var tracks = [],
+  const tracks = [],
     levels = shaka.getVariantTracks().filter(function(t) {
       return t.type === 'variant'
     });
 
   if (levels.length > 1) {
 
-    var autoLevel = {
+    const autoLevel = {
       id: -1,
       label: 'auto',
       selected: true
@@ -18,11 +18,15 @@ function _getQuality(player, shaka) {
 
   levels.forEach(function(level, index) {
 
-    var track = level;
+    const track = level;
 
     track.label = level.height + 'p (' + ((level.bandwidth / 1000).toFixed(0)) + 'k)';
 
     tracks.push(track);
+  });
+
+  tracks.sort((track1, track2) => {
+    return track1.height - track2.height;
   });
 
   return tracks;
@@ -30,7 +34,7 @@ function _getQuality(player, shaka) {
 
 export default function setupQualityTracks(player, shaka) {
 
-  var me = this;
+  const me = this;
 
   player.trigger('loadedqualitydata', {
     qualityData: {
@@ -48,7 +52,7 @@ export default function setupQualityTracks(player, shaka) {
       // Is auto?
       if (id === -1) return;
 
-      var tracks = shaka.getVariantTracks().filter(function(t) {
+      const tracks = shaka.getVariantTracks().filter(function(t) {
         return t.id === id && t.type === 'variant'
       });
 

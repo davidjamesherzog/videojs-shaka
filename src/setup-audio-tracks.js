@@ -44,6 +44,12 @@ function handleAudioTracksAdded(player, tech, shaka, tracks) {
   tracks.forEach((dashTrack, index) => {
     const label = generateLabelFromTrack(dashTrack);
 
+    if (dashTrack === currentAudioTrack) {
+      player.trigger('shakaaudiotrackchange', {
+        language: dashTrack.language
+      });
+    }
+
     // Add the track to the player's audio track list.
     videojsAudioTracks.addTrack(
       new videojs.AudioTrack({
@@ -65,6 +71,9 @@ function handleAudioTracksAdded(player, tech, shaka, tracks) {
         const dashAudioTrack = findDashAudioTrack(tracks, track);
 
         // Set is as the current track
+        player.trigger('shakaaudiotrackchange', {
+          language: dashAudioTrack.language
+        });
         shaka.selectAudioLanguage(dashAudioTrack.language, dashAudioTrack.role);
 
         // Stop looping
@@ -75,7 +84,6 @@ function handleAudioTracksAdded(player, tech, shaka, tracks) {
 
   videojsAudioTracks.addEventListener('change', audioTracksChangeHandler);
   shaka.addEventListener('unloading', () => {
-    console.log('ended, turning off change audio event');
     videojsAudioTracks.removeEventListener('change', audioTracksChangeHandler);
   });
 }
