@@ -4,8 +4,19 @@ shaka player
 
 ## Table of Contents
 
-<!-- START doctoc -->
-<!-- END doctoc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Installation](#installation)
+- [Usage](#usage)
+  - [`<script>` Tag](#script-tag)
+  - [Browserify/CommonJS](#browserifycommonjs)
+  - [RequireJS/AMD](#requirejsamd)
+- [Special Thanks](#special-thanks)
+- [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 ## Installation
 
 ```sh
@@ -24,11 +35,28 @@ This is the simplest case. Get the script in whatever way you prefer and include
 <script src="//path/to/video.min.js"></script>
 <script src="//path/to/videojs-shaka.min.js"></script>
 <script>
-  var player = videojs('my-video');
+  var player = videojs('my-video', {
+    techOrder: ['shaka', 'html5'],
+    ...
+  });
 
-  player.shaka();
+  player.qualityPickerPlugin();
 </script>
 ```
+
+If you want to enable the bitrate quality picker menu, you'll need to initialize it by calling the `qualityPickerPlugin` function.
+
+```html
+<script>
+  var player = videojs('my-video', {
+    techOrder: ['shaka', 'html5'],
+    ...
+  });
+
+  player.qualityPickerPlugin();
+</script>
+```
+
 
 ### Browserify/CommonJS
 
@@ -42,9 +70,12 @@ var videojs = require('video.js');
 // to a variable.
 require('videojs-shaka');
 
-var player = videojs('my-video');
+var player = videojs('my-video', {
+    techOrder: ['shaka', 'html5'],
+    ...
+  });
 
-player.shaka();
+player.qualityPickerPlugin();
 ```
 
 ### RequireJS/AMD
@@ -53,11 +84,23 @@ When using with RequireJS (or another AMD library), get the script in whatever w
 
 ```js
 require(['video.js', 'videojs-shaka'], function(videojs) {
-  var player = videojs('my-video');
+  var player = videojs('my-video', {
+    techOrder: ['shaka', 'html5'],
+    ...
+  });
 
-  player.shaka();
+  player.qualityPickerPlugin();
 });
 ```
+
+## Special Thanks
+
+This library wasn't possible without the following libraries that were used to create this.
+
+videojs-shaka-player - [https://github.com/MetaCDN/videojs-shaka-player](https://github.com/MetaCDN/videojs-shaka-player) 
+videojs-quality-picker - [https://github.com/streamroot/videojs-quality-picker/](https://github.com/streamroot/videojs-quality-picker/) 
+videojs-shaka - [https://github.com/halibegic/videojs-shaka](https://github.com/halibegic/videojs-shaka) 
+videojs-contrib-dash - [https://github.com/videojs/videojs-contrib-dash](https://github.com/videojs/videojs-contrib-dash) 
 
 ## License
 
