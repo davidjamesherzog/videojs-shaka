@@ -105,12 +105,6 @@ export default function setupTextTracks(player, shaka) {
   // Store the tracks that we've added so we can remove them later.
   let dashTracksAttachedToVideoJs = [];
 
-  // We're relying on the user to disable native captions. Show an error if they didn't do so.
-  if (player.featuresNativeTextTracks) {
-    videojs.log.error('You must pass {html: {nativeCaptions: false}} in the videojs constructor ' +
-      'to use text tracks in videojs-contrib-dash');
-    return;
-  }
 
   // Clear the tracks that we added. We don't clear them all because someone else can add tracks.
   function clearDashTracks() {

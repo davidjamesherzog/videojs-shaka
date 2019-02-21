@@ -10,9 +10,10 @@ const Html5 = videojs.getTech('Html5');
 const defaults = {};
 
 /**
- * An advanced Video.js plugin. For more information on the API
+ * Shaka Media Controller - Wrapper for HTML5 Media API
  *
- * See: https://blog.videojs.com/feature-spotlight-advanced-plugins/
+ * @mixes Html5~SourceHandlerAdditions
+ * @extends Html5
  */
 class Shaka extends Html5 {
 
@@ -29,11 +30,19 @@ class Shaka extends Html5 {
    *         second argument of options is a convenient way to accept inputs
    *         from your plugin's caller.
    */
-  constructor(player, options) {
-    // the parent class will add player under this.player
-    super(player);
+  /**
+   * Create an instance of this Tech.
+   *
+   * @param {Object} [options]
+   *        The key/value store of player options.
+   *
+   * @param {Component~ReadyCallback} ready
+   *        Callback function to call when the `HTML5` Tech is ready.
+   */
+  constructor(options, ready) {
+    super(options, ready);
 
-    this.options = videojs.mergeOptions(defaults, options);
+    //this.options = videojs.mergeOptions(defaults, options);
 
     this.player_.ready(() => {
       this.player_.addClass('vjs-shaka');
@@ -50,17 +59,6 @@ class Shaka extends Html5 {
 
     this.shaka_ = new shaka.Player(this.el_);
 
-    this.shaka_.configure({
-      abr: {
-        enabled: true
-      },
-      drm: this.options_.drm || {}
-    });
-
-    this.shaka_.addEventListener('buffering', function(e) {
-      if (e.buffering) me.trigger('waiting');
-    });
-
     this.el_.tech = this;
     return this.el_;
   }
@@ -68,6 +66,20 @@ class Shaka extends Html5 {
   setSrc(src) {
 
     var me = this;
+
+    this.shaka_.configure({
+      abr: {
+        enabled: true
+      },
+      drm: this.options_.drm || {}
+    });
+    if (this.options_.licenseServerAuth) {
+      this.shaka_.getNetworkingEngine().registerRequestFilter(this.options_.licenseServerAuth);
+    }
+
+    this.shaka_.addEventListener('buffering', function(e) {
+      if (e.buffering) me.trigger('waiting');
+    });
 
     this.shaka_.load(src).then(function() {
       me.initShakaMenus();
