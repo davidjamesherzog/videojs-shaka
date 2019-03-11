@@ -6,12 +6,12 @@ import videojs from 'video.js';
  * natively.
  *
  * @private
- * @param {videojs} player the videojs player instance
+ * @param {videojs} tech the videojs player tech instance
  * @param {videojs.tech} tech the videojs tech being used
  */
-function handleAudioTracksAdded(player, tech, shaka, tracks) {
+function handleAudioTracksAdded(tech, shaka, tracks) {
 
-  const videojsAudioTracks = player.audioTracks();
+  const videojsAudioTracks = tech.audioTracks();
 
   function generateIdFromTrackIndex(index) {
     return `dash-audio-${index}`;
@@ -45,7 +45,7 @@ function handleAudioTracksAdded(player, tech, shaka, tracks) {
     const label = generateLabelFromTrack(dashTrack);
 
     if (dashTrack === currentAudioTrack) {
-      player.trigger('shakaaudiotrackchange', {
+      tech.trigger('shakaaudiotrackchange', {
         language: dashTrack.language
       });
     }
@@ -62,8 +62,8 @@ function handleAudioTracksAdded(player, tech, shaka, tracks) {
     );
   });
 
-  player.one('loadeddata', function() {
-    const audioTracks = player.audioTracks();
+  tech.one('loadeddata', function() {
+    const audioTracks = tech.audioTracks();
     const deleteTracks = [];
 
     // look for bogus tracks in Edge
@@ -96,7 +96,7 @@ function handleAudioTracksAdded(player, tech, shaka, tracks) {
         const dashAudioTrack = findDashAudioTrack(tracks, track);
 
         // Set is as the current track
-        player.trigger('shakaaudiotrackchange', {
+        tech.trigger('shakaaudiotrackchange', {
           language: dashAudioTrack.language
         });
         shaka.selectAudioLanguage(dashAudioTrack.language, dashAudioTrack.role);
@@ -113,10 +113,6 @@ function handleAudioTracksAdded(player, tech, shaka, tracks) {
   });
 }
 
-/*
- * Call `handlePlaybackMetadataLoaded` when `mediaPlayer` emits
- * `dashjs.MediaPlayer.events.PLAYBACK_METADATA_LOADED`.
- */
-export default function setupAudioTracks(player, tech, shaka) {
-  handleAudioTracksAdded(player, tech, shaka, shaka.getAudioLanguagesAndRoles());
+export default function setupAudioTracks(tech, shaka) {
+  handleAudioTracksAdded(tech, shaka, shaka.getAudioLanguagesAndRoles());
 }

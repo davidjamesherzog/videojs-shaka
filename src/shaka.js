@@ -95,9 +95,9 @@ class Shaka extends Html5 {
   }
 
   initShakaMenus() {
-    setupQualityTracks(this.player_, this.shaka_);
-    setupTextTracks(this.player_, this.shaka_);
-    setupAudioTracks(this.player_, this, this.shaka_);
+    setupQualityTracks(this, this.shaka_);
+    setupTextTracks(this, this.shaka_);
+    setupAudioTracks(this, this.shaka_);
   }
 
 }

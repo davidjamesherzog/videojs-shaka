@@ -1,4 +1,4 @@
-function _getQuality(player, shaka) {
+function _getQuality(tech, shaka) {
 
   const tracks = [],
     levels = shaka.getVariantTracks().filter(function(t) {
@@ -69,13 +69,11 @@ function _getQuality(player, shaka) {
   return sortedTracks;
 }
 
-export default function setupQualityTracks(player, shaka) {
+export default function setupQualityTracks(tech, shaka) {
 
-  const me = this;
-
-  player.trigger('loadedqualitydata', {
+  tech.trigger('loadedqualitydata', {
     qualityData: {
-      video: _getQuality(player, shaka)
+      video: _getQuality(tech, shaka)
     },
     qualitySwitchCallback: function(id, type) {
 

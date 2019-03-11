@@ -11,12 +11,12 @@ function find(l, f) {
 /*
  * Attach text tracks from dash.js to videojs
  *
- * @param {videojs} player the videojs player instance
+ * @param {videojs} tech the videojs player tech instance
  * @param {array} tracks the tracks loaded by dash.js to attach to videojs
  *
  * @private
  */
-function attachDashTextTracksToVideojs(player, shaka, tracks) {
+function attachDashTextTracksToVideojs(tech, shaka, tracks) {
 
   const trackDictionary = [];
 
@@ -36,7 +36,7 @@ function attachDashTextTracksToVideojs(player, shaka, tracks) {
 
     // Add track to videojs track list
     .map(({trackConfig, dashTrack}) => {
-      const remoteTextTrack = player.addRemoteTextTrack(trackConfig, false);
+      const remoteTextTrack = tech.addRemoteTextTrack(trackConfig, false);
 
       trackDictionary.push({textTrack: remoteTextTrack.track, dashTrack});
 
@@ -55,7 +55,7 @@ function attachDashTextTracksToVideojs(player, shaka, tracks) {
   function updateActiveDashTextTrack() {
 
     let dashTrackToActivate;
-    const textTracks = player.textTracks();
+    const textTracks = tech.textTracks();
 
     // Iterate through the tracks and find the one marked as showing. If none are showing,
     // disable text tracks.
@@ -87,11 +87,11 @@ function attachDashTextTracksToVideojs(player, shaka, tracks) {
   }
 
   // Update dash when videojs's selected text track changes.
-  player.textTracks().on('change', updateActiveDashTextTrack);
+  tech.textTracks().on('change', updateActiveDashTextTrack);
 
   // Cleanup event listeners whenever we start loading a new source
   shaka.addEventListener('unloading', () => {
-    player.textTracks().off('change', updateActiveDashTextTrack);
+    tech.textTracks().off('change', updateActiveDashTextTrack);
   });
 
   // Initialize the text track on our first run-through
@@ -100,7 +100,7 @@ function attachDashTextTracksToVideojs(player, shaka, tracks) {
   return tracksAttached;
 }
 
-export default function setupTextTracks(player, shaka) {
+export default function setupTextTracks(tech, shaka) {
 
   // Store the tracks that we've added so we can remove them later.
   let dashTracksAttachedToVideoJs = [];
@@ -108,7 +108,7 @@ export default function setupTextTracks(player, shaka) {
 
   // Clear the tracks that we added. We don't clear them all because someone else can add tracks.
   function clearDashTracks() {
-    dashTracksAttachedToVideoJs.forEach(player.removeRemoteTextTrack.bind(player));
+    dashTracksAttachedToVideoJs.forEach(tech.removeRemoteTextTrack.bind(tech));
 
     dashTracksAttachedToVideoJs = [];
   }
@@ -124,7 +124,7 @@ export default function setupTextTracks(player, shaka) {
     }
 
     // Save the tracks so we can remove them later
-    dashTracksAttachedToVideoJs = attachDashTextTracksToVideojs(player, shaka, tracks);
+    dashTracksAttachedToVideoJs = attachDashTextTracksToVideojs(tech, shaka, tracks);
   }
 
   handleTextTracksAdded(shaka.getTextTracks());
