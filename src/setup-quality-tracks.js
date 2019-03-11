@@ -20,16 +20,53 @@ function _getQuality(player, shaka) {
 
     const track = level;
 
-    track.label = level.height + 'p (' + ((level.bandwidth / 1000).toFixed(0)) + 'k)';
+    let label = '';
+    if (level.height >= 2160) {
+      label = ' (4k)';
+    } else if (level.height >= 1440) {
+      label = ' (2k)';
+    } else if (level.height >= 720) {
+      label = ' (HD)';
+    }
+    track.label = level.height + 'p' + label;
 
     tracks.push(track);
   });
 
-  tracks.sort((track1, track2) => {
-    return track1.height - track2.height;
-  });
+  // group tracks by langugage b/c we will need to only display the tracks associated with the current audio track
+  const sortedTracks = tracks
+    .sort((track1, track2) => {
+      if (track1.language > track2.language) {
+        return -1;
+      }
+      if (track2.language > track1.language) {
+        return 1;
+      }
+      if (track1.height > track2.height) {
+        return -1;
+      }
+      if (track2.height > track1.height) {
+        return 1;
+      }
+      if (track1.bandwith > track2.bandwith) {
+        return -1;
+      }
+      if (track2.bandwith > track1.bandwith) {
+        return 1;
+      }
+      return 0;
+    })
+    .reduce((accumulator, track) => {
+      if (track.height !== accumulator.previousHeight ||
+        (track.height === accumulator.previousHeight && track.language !== accumulator.previousLanguage)) {
+        accumulator.previousHeight = track.height;
+        accumulator.previousLanguage = track.language;
+        accumulator.list.push(track);
+      }
+      return accumulator;
+    }, { previousHeight: null, previousLanguage: null, list: [] }).list;
 
-  return tracks;
+  return sortedTracks;
 }
 
 export default function setupQualityTracks(player, shaka) {
