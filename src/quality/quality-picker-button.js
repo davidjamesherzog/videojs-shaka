@@ -33,8 +33,13 @@ class QualityPickerButton extends VjsButton {
   }
 
   buildCSSClass() {
-    return `${TRACK_CLASS[this.options_.trackType]} vjs-icon-placeholder ${super.buildCSSClass()}`;
+    return `vjs-quality-button ${super.buildCSSClass()}`;
   }
+
+  buildWrapperCSSClass() {
+    return `vjs-quality-button ${super.buildWrapperCSSClass()}`;
+  }
+
 }
 
 export default QualityPickerButton;
