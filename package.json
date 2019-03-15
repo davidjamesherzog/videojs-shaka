@@ -1,6 +1,6 @@
 {
   "name": "videojs-shaka",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "shaka player",
   "main": "dist/videojs-shaka.cjs.js",
   "module": "dist/videojs-shaka.es.js",
@@ -45,7 +45,7 @@
     "videojs",
     "videojs-plugin"
   ],
-  "author": "Dave Herzog <dherzog@dramafever.com>",
+  "author": "Dave Herzog <davidjherzog@gmail.com>",
   "license": "MIT",
   "vjsstandard": {
     "ignore": [
