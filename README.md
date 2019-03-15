@@ -11,8 +11,7 @@ shaka player
 - [Installation](#installation)
 - [Usage](#usage)
   - [`<script>` Tag](#script-tag)
-  - [Browserify/CommonJS](#browserifycommonjs)
-  - [RequireJS/AMD](#requirejsamd)
+  - [DRM](#drm)
 - [Special Thanks](#special-thanks)
 - [License](#license)
 
@@ -36,7 +35,7 @@ This is the simplest case. Get the script in whatever way you prefer and include
 <script src="//path/to/videojs-shaka.min.js"></script>
 <script>
   var player = videojs('my-video', {
-    techOrder: ['shaka', 'html5'],
+    techOrder: ['shaka'],
     ...
   });
 
@@ -49,7 +48,7 @@ If you want to enable the bitrate quality picker menu, you'll need to initialize
 ```html
 <script>
   var player = videojs('my-video', {
-    techOrder: ['shaka', 'html5'],
+    techOrder: ['shaka'],
     ...
   });
 
@@ -57,50 +56,48 @@ If you want to enable the bitrate quality picker menu, you'll need to initialize
 </script>
 ```
 
+### DRM
 
-### Browserify/CommonJS
+Config DRM in the following manner:
 
-When using with Browserify, install videojs-shaka via npm and `require` the plugin as you would any other module.
-
-```js
-var videojs = require('video.js');
-
-// The actual plugin function is exported by this module, but it is also
-// attached to the `Player.prototype`; so, there is no need to assign it
-// to a variable.
-require('videojs-shaka');
-
-var player = videojs('my-video', {
-    techOrder: ['shaka', 'html5'],
-    ...
-  });
-
-player.qualityPickerPlugin();
-```
-
-### RequireJS/AMD
-
-When using with RequireJS (or another AMD library), get the script in whatever way you prefer and `require` the plugin as you normally would:
-
-```js
-require(['video.js', 'videojs-shaka'], function(videojs) {
+```html
+<script>
   var player = videojs('my-video', {
-    techOrder: ['shaka', 'html5'],
+    techOrder: ['shaka'],
+    shaka: {
+      drm: {
+        servers: {
+          'com.widevine.alpha': 'https://foo.bar/drm/widevine'
+        }
+      },
+      licenseServerAuth: function(type, request) {
+        // Only add headers to license requests:
+        if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
+          // This is the specific header name and value the server wants:
+          request.headers['CWIP-Auth-Header'] = 'VGhpc0lzQVRlc3QK';
+          // This is the specific parameter name and value the server wants:
+          // Note that all network requests can have multiple URIs (for fallback),
+          // and therefore this is an array. But there should only be one license
+          // server URI in this tutorial.
+          request.uris[0] += '?CWIP-Auth-Param=VGhpc0lzQVRlc3QK';
+        }
+      }
+    }
     ...
   });
 
   player.qualityPickerPlugin();
-});
+</script>
 ```
 
 ## Special Thanks
 
-This library wasn't possible without the following libraries that were used to create this.
+This library wasn't possible without leveraging the following libraries that were used to create this.
 
-videojs-shaka-player - [https://github.com/MetaCDN/videojs-shaka-player](https://github.com/MetaCDN/videojs-shaka-player) 
-videojs-quality-picker - [https://github.com/streamroot/videojs-quality-picker/](https://github.com/streamroot/videojs-quality-picker/) 
-videojs-shaka - [https://github.com/halibegic/videojs-shaka](https://github.com/halibegic/videojs-shaka) 
-videojs-contrib-dash - [https://github.com/videojs/videojs-contrib-dash](https://github.com/videojs/videojs-contrib-dash) 
+- videojs-shaka-player - [https://github.com/MetaCDN/videojs-shaka-player](https://github.com/MetaCDN/videojs-shaka-player) 
+- videojs-quality-picker - [https://github.com/streamroot/videojs-quality-picker/](https://github.com/streamroot/videojs-quality-picker/) 
+- videojs-shaka - [https://github.com/halibegic/videojs-shaka](https://github.com/halibegic/videojs-shaka) 
+- videojs-contrib-dash - [https://github.com/videojs/videojs-contrib-dash](https://github.com/videojs/videojs-contrib-dash) 
 
 ## License
 
