@@ -1,7 +1,7 @@
 {
   "name": "videojs-shaka",
-  "version": "0.1.0",
-  "description": "shaka player",
+  "version": "0.1.1",
+  "description": "video.js shaka player tech",
   "main": "dist/videojs-shaka.cjs.js",
   "module": "dist/videojs-shaka.es.js",
   "generator-videojs-plugin": {
@@ -12,6 +12,7 @@
     "ie 11"
   ],
   "scripts": {
+    "prepare": "npm run build",
     "prebuild": "npm run clean",
     "build": "npm-run-all -p build:*",
     "build:css": "postcss -o dist/videojs-shaka.css --config scripts/postcss.config.js src/plugin.css",
@@ -43,7 +44,8 @@
   },
   "keywords": [
     "videojs",
-    "videojs-plugin"
+    "videojs-plugin",
+    "shaka-player"
   ],
   "author": "Dave Herzog <davidjherzog@gmail.com>",
   "license": "MIT",

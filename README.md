@@ -31,6 +31,7 @@ To include videojs-shaka on your website or web application, use any of the foll
 This is the simplest case. Get the script in whatever way you prefer and include the plugin _after_ you include [video.js][videojs], so that the `videojs` global is available.
 
 ```html
+<script src="//path/to/shaka-player.compiled.js"></script>
 <script src="//path/to/video.min.js"></script>
 <script src="//path/to/videojs-shaka.min.js"></script>
 <script>
