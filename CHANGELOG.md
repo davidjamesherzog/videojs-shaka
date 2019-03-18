@@ -1,4 +1,7 @@
-## 0.1.1 (2019-01-25)
+## 0.1.2 (2019-03-18)
+* Fix messed up 0.1.1 failed release
+
+## 0.1.1 (2019-03-18)
 * Update README
 * Update keywords
 * Add `prepare` task to NPM script
