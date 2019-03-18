@@ -12,6 +12,7 @@ shaka player
 - [Usage](#usage)
   - [`<script>` Tag](#script-tag)
   - [DRM](#drm)
+  - [`qualitytrackchange` Event](#qualitytrackchange-event)
 - [Special Thanks](#special-thanks)
 - [License](#license)
 
@@ -58,6 +59,50 @@ If you want to enable the bitrate quality picker menu, you'll need to initialize
 ```
 
 ### DRM
+
+Config DRM in the following manner:
+
+```html
+<script>
+  var player = videojs('my-video', {
+    techOrder: ['shaka'],
+    shaka: {
+      drm: {
+        servers: {
+          'com.widevine.alpha': 'https://foo.bar/drm/widevine'
+        }
+      },
+      licenseServerAuth: function(type, request) {
+        // Only add headers to license requests:
+        if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
+          // This is the specific header name and value the server wants:
+          request.headers['CWIP-Auth-Header'] = 'VGhpc0lzQVRlc3QK';
+          // This is the specific parameter name and value the server wants:
+          // Note that all network requests can have multiple URIs (for fallback),
+          // and therefore this is an array. But there should only be one license
+          // server URI in this tutorial.
+          request.uris[0] += '?CWIP-Auth-Param=VGhpc0lzQVRlc3QK';
+        }
+      }
+    }
+    ...
+  });
+
+  player.qualityPickerPlugin();
+</script>
+```
+
+### `qualitytrackchange` Event
+
+If you would like to know when a user switches video quality, you can register an event listener for `qualitytrackchange`.  The quality track object will be returned to you.
+
+```html
+<script>
+  player.on('qualitytrackchange', function(event, track) {
+    // do something with the track that was selected
+  });
+</script>
+```
 
 Config DRM in the following manner:
 

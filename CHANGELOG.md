@@ -1,3 +1,7 @@
+## 0.1.3 (2019-03-18)
+* Update browser in package.json and repository
+* Update README
+
 ## 0.1.2 (2019-03-18)
 * Fix messed up 0.1.1 failed release
 

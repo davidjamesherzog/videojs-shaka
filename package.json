@@ -1,9 +1,10 @@
 {
   "name": "videojs-shaka",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "video.js shaka player tech",
   "main": "dist/videojs-shaka.cjs.js",
   "module": "dist/videojs-shaka.es.js",
+  "browser": "dist/videojs-shaka.js",
   "generator-videojs-plugin": {
     "version": "7.6.1"
   },
@@ -49,6 +50,10 @@
   ],
   "author": "Dave Herzog <davidjherzog@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davidjamesherzog/videojs-shaka"
+  },
   "vjsstandard": {
     "ignore": [
       "dist",
