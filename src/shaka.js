@@ -57,6 +57,15 @@ class Shaka extends Html5 {
     // Install built-in polyfills to patch browser incompatibilities.
     shaka.polyfill.installAll();
 
+    // set debug log level
+    if (shaka.log) {
+      if (this.options_.debug) {
+        shaka.log.setLevel(shaka.log.Level.DEBUG);
+      } else {
+        shaka.log.setLevel(shaka.log.Level.ERROR);
+      }
+    }
+
     this.shaka_ = new shaka.Player(this.el_);
 
     this.el_.tech = this;

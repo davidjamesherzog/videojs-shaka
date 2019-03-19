@@ -11,6 +11,7 @@ shaka player
 - [Installation](#installation)
 - [Usage](#usage)
   - [`<script>` Tag](#script-tag)
+  - [Debug](#debug)
   - [DRM](#drm)
   - [`qualitytrackchange` Event](#qualitytrackchange-event)
 - [Special Thanks](#special-thanks)
@@ -51,6 +52,27 @@ If you want to enable the bitrate quality picker menu, you'll need to initialize
 <script>
   var player = videojs('my-video', {
     techOrder: ['shaka'],
+    ...
+  });
+
+  player.qualityPickerPlugin();
+</script>
+```
+
+### Debug
+
+Configure DEBUG logging level in the following manner by including the `shaka-player.compiled.debug.js` on your page (default will be set to ERROR):
+
+```html
+<script src="//path/to/shaka-player.compiled.debug.js"></script>
+<script src="//path/to/video.min.js"></script>
+<script src="//path/to/videojs-shaka.min.js"></script>
+<script>
+  var player = videojs('my-video', {
+    techOrder: ['shaka'],
+    shaka: {
+      debug: true
+    }
     ...
   });
 
