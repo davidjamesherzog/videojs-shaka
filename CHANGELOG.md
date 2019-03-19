@@ -1,3 +1,7 @@
+## 0.2.0 (2019-03-19)
+* Add ability to set DRM server after video.js loads
+* Add debug capabilities
+
 ## 0.1.3 (2019-03-18)
 * Update browser in package.json and repository
 * Update README
