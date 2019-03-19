@@ -67,11 +67,17 @@ class Shaka extends Html5 {
 
     var me = this;
 
+    let drm;
+    if (typeof this.options_.drm === 'function') {
+      drm = this.options_.drm();
+    } else {
+      drm = this.options_.drm || {};
+    }
     this.shaka_.configure({
       abr: {
         enabled: true
       },
-      drm: this.options_.drm || {}
+      drm: drm
     });
     if (this.options_.licenseServerAuth) {
       this.shaka_.getNetworkingEngine().registerRequestFilter(this.options_.licenseServerAuth);

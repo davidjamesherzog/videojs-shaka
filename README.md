@@ -60,7 +60,7 @@ If you want to enable the bitrate quality picker menu, you'll need to initialize
 
 ### DRM
 
-Config DRM in the following manner:
+Configure DRM in the following manner:
 
 ```html
 <script>
@@ -91,6 +91,30 @@ Config DRM in the following manner:
   player.qualityPickerPlugin();
 </script>
 ```
+
+If you need to set the DRM server after you initialize video.js prior to loading the source, you can specify a function for `shaka.drm` as follows:
+
+```html
+<script>
+  var player = videojs('my-video', {
+    techOrder: ['shaka'],
+    shaka: {
+      drm: function() {
+        // return the object here like
+        return {
+          servers: {
+            'com.widevine.alpha': 'https://foo.bar/drm/widevine'
+          }
+        }
+      }
+    }
+    ...
+  });
+
+  player.qualityPickerPlugin();
+</script>
+```
+
 
 ### `qualitytrackchange` Event
 
@@ -101,38 +125,6 @@ If you would like to know when a user switches video quality, you can register a
   player.on('qualitytrackchange', function(event, track) {
     // do something with the track that was selected
   });
-</script>
-```
-
-Config DRM in the following manner:
-
-```html
-<script>
-  var player = videojs('my-video', {
-    techOrder: ['shaka'],
-    shaka: {
-      drm: {
-        servers: {
-          'com.widevine.alpha': 'https://foo.bar/drm/widevine'
-        }
-      },
-      licenseServerAuth: function(type, request) {
-        // Only add headers to license requests:
-        if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
-          // This is the specific header name and value the server wants:
-          request.headers['CWIP-Auth-Header'] = 'VGhpc0lzQVRlc3QK';
-          // This is the specific parameter name and value the server wants:
-          // Note that all network requests can have multiple URIs (for fallback),
-          // and therefore this is an array. But there should only be one license
-          // server URI in this tutorial.
-          request.uris[0] += '?CWIP-Auth-Param=VGhpc0lzQVRlc3QK';
-        }
-      }
-    }
-    ...
-  });
-
-  player.qualityPickerPlugin();
 </script>
 ```
 
