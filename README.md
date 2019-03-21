@@ -41,8 +41,6 @@ This is the simplest case. Get the script in whatever way you prefer and include
     techOrder: ['shaka'],
     ...
   });
-
-  player.qualityPickerPlugin();
 </script>
 ```
 

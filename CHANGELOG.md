@@ -1,3 +1,7 @@
+## 0.2.1 (2019-03-21)
+* Fix bandwidth typo
+* Don't set audio track if it is not found
+
 ## 0.2.0 (2019-03-19)
 * Add ability to set DRM server after video.js loads
 * Add debug capabilities
