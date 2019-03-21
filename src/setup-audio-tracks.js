@@ -95,14 +95,17 @@ function handleAudioTracksAdded(tech, shaka, tracks) {
         // Find the audio track we just selected by the id
         const dashAudioTrack = findDashAudioTrack(tracks, track);
 
-        // Set is as the current track
-        tech.trigger('shakaaudiotrackchange', {
-          language: dashAudioTrack.language
-        });
-        shaka.selectAudioLanguage(dashAudioTrack.language, dashAudioTrack.role);
+        if (dashAudioTrack) {
+          // Set is as the current track
+          tech.trigger('shakaaudiotrackchange', {
+            language: dashAudioTrack.language
+          });
+          shaka.selectAudioLanguage(dashAudioTrack.language, dashAudioTrack.role);
 
-        // Stop looping
-        continue;
+          // Stop looping
+          continue;
+        }
+
       }
     }
   };
