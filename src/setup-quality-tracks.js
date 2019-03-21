@@ -48,10 +48,10 @@ function _getQuality(tech, shaka) {
       if (track2.height > track1.height) {
         return 1;
       }
-      if (track1.bandwith > track2.bandwith) {
+      if (track1.bandwidth > track2.bandwidth) {
         return -1;
       }
-      if (track2.bandwith > track1.bandwith) {
+      if (track2.bandwidth > track1.bandwidth) {
         return 1;
       }
       return 0;
