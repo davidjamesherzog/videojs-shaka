@@ -1,3 +1,6 @@
+## 0.2.2 (2019-04-16)
+* Don't remove garbage dash-audio track (clients will have to do it)
+
 ## 0.2.1 (2019-03-21)
 * Fix bandwidth typo
 * Don't set audio track if it is not found
