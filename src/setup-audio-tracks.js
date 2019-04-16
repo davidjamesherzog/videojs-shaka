@@ -62,31 +62,6 @@ function handleAudioTracksAdded(tech, shaka, tracks) {
     );
   });
 
-  tech.one('loadeddata', function() {
-    const audioTracks = tech.audioTracks();
-    const deleteTracks = [];
-
-    // look for bogus tracks in Edge
-    audioTracks.tracks_.forEach(track => {
-      if (track.id.indexOf('dash-audio') === -1) {
-        deleteTracks.push(track);
-      }
-    });
-
-    deleteTracks.forEach(track => {
-      audioTracks.removeTrack(track);
-    });
-
-    // set default audio language
-    audioTracks.tracks_.forEach((track, index) => {
-      if (index === 0) {
-        track.enabled = true;
-      } else {
-        track.enabled = false;
-      }
-    });
-  });
-
   const audioTracksChangeHandler = () => {
     for (let i = 0; i < videojsAudioTracks.length; i++) {
       const track = videojsAudioTracks[i];
