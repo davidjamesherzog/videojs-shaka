@@ -5,10 +5,10 @@ const VjsMenuItem = videojs.getComponent('MenuItem');
 class QualityMenuItem extends VjsMenuItem {
 
   handleClick() {
-      super.handleClick();
+    super.handleClick();
 
-      this.player_.trigger('qualitytrackchange', this.options_);
-      this.options_.qualitySwitchCallback(this.options_.id, this.options_.trackType);
+    this.player_.trigger('qualitytrackchange', this.options_);
+    this.options_.qualitySwitchCallback(this.options_.id, this.options_.trackType);
   }
 }
 

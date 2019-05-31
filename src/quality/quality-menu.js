@@ -29,9 +29,9 @@ class QualityMenu extends VjsMenu {
     super.addItem(component);
 
     component.on('click', () => {
-      let children = this.children();
+      const children = this.children();
 
-      for (let i=0; i < children.length; i++) {
+      for (let i = 0; i < children.length; i++) {
         const child = children[i];
         if (component !== child) {
           child.selected(false);

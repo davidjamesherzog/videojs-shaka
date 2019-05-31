@@ -4,10 +4,10 @@ import QualityMenuItem from './quality-menu-item';
 
 const VjsButton = videojs.getComponent('MenuButton');
 
-let TRACK_CLASS = {
-    video: 'vjs-icon-hd',
-    audio: 'vjs-icon-cog',
-    subtitle: 'vjs-icon-subtitles'
+const TRACK_CLASS = {
+  video: 'vjs-icon-hd',
+  audio: 'vjs-icon-cog',
+  subtitle: 'vjs-icon-subtitles'
 };
 
 class QualityPickerButton extends VjsButton {
@@ -20,7 +20,7 @@ class QualityPickerButton extends VjsButton {
     const menu = new QualityMenu(this.player_, this.options_);
     let menuItem;
     let options;
-    for (let i=0; i < this.options_.qualityList.length; i++) {
+    for (let i = 0; i < this.options_.qualityList.length; i++) {
       const quality = this.options_.qualityList[i];
       const {qualitySwitchCallback, trackType} = this.options_;
       options = Object.assign({qualitySwitchCallback, trackType}, quality, { selectable: true });

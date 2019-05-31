@@ -105,7 +105,6 @@ export default function setupTextTracks(tech, shaka) {
   // Store the tracks that we've added so we can remove them later.
   let dashTracksAttachedToVideoJs = [];
 
-
   // Clear the tracks that we added. We don't clear them all because someone else can add tracks.
   function clearDashTracks() {
     dashTracksAttachedToVideoJs.forEach(tech.removeRemoteTextTrack.bind(tech));

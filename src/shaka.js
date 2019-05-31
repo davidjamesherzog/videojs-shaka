@@ -7,7 +7,7 @@ import {version as VERSION} from '../package.json';
 const Html5 = videojs.getTech('Html5');
 
 // Default options for the plugin.
-const defaults = {};
+// const defaults = {};
 
 /**
  * Shaka Media Controller - Wrapper for HTML5 Media API
@@ -42,7 +42,6 @@ class Shaka extends Html5 {
   constructor(options, ready) {
     super(options, ready);
 
-    //this.options = videojs.mergeOptions(defaults, options);
     this.vjsPlayer = videojs(options.playerId);
 
     this.player_.ready(() => {
@@ -51,8 +50,6 @@ class Shaka extends Html5 {
   }
 
   createEl() {
-    var me = this;
-
     this.el_ = Html5.prototype.createEl.apply(this, arguments);
 
     // Install built-in polyfills to patch browser incompatibilities.
@@ -75,7 +72,7 @@ class Shaka extends Html5 {
 
   setSrc(src) {
 
-    var me = this;
+    const me = this;
 
     let drm;
     if (typeof this.options_.drm === 'function') {
@@ -97,7 +94,7 @@ class Shaka extends Html5 {
       if (event.buffering) me.trigger('waiting');
     });
 
-    this.shaka_.addEventListener('error', function (event) {
+    this.shaka_.addEventListener('error', function(event) {
       me.retriggerError(event.detail);
     });
 
@@ -175,7 +172,7 @@ Shaka.isSupported = function() {
 
 Shaka.canPlaySource = function(source, tech) {
 
-  var dashTypeRE = /^application\/dash\+xml/i;
+  const dashTypeRE = /^application\/dash\+xml/i;
 
   if (dashTypeRE.test(source.type)) {
     return 'probably';

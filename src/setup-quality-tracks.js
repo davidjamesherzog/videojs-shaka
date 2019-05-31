@@ -1,9 +1,9 @@
 function _getQuality(tech, shaka) {
 
-  const tracks = [],
-    levels = shaka.getVariantTracks().filter(function(t) {
-      return t.type === 'variant'
-    });
+  const tracks = [];
+  const levels = shaka.getVariantTracks().filter(function(t) {
+    return t.type === 'variant';
+  });
 
   if (levels.length > 1) {
 
@@ -88,7 +88,7 @@ export default function setupQualityTracks(tech, shaka) {
       if (id === -1) return;
 
       const tracks = shaka.getVariantTracks().filter(function(t) {
-        return t.id === id && t.type === 'variant'
+        return t.id === id && t.type === 'variant';
       });
 
       shaka.selectVariantTrack(tracks[0], /* clearBuffer */ true);
