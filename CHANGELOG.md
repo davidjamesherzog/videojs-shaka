@@ -1,3 +1,6 @@
+## 0.3.0 (2019-05-31)
+* Retrigger shaka errors to video.js errors
+
 ## 0.2.2 (2019-04-16)
 * Don't remove garbage dash-audio track (clients will have to do it)
 
@@ -21,5 +24,5 @@
 * Update keywords
 * Add `prepare` task to NPM script
 
-## 0.1.0 (2019-3-15)
+## 0.1.0 (2019-03-15)
 * Initial release
