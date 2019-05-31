@@ -43,6 +43,7 @@ class Shaka extends Html5 {
     super(options, ready);
 
     //this.options = videojs.mergeOptions(defaults, options);
+    this.vjsPlayer = videojs(options.playerId);
 
     this.player_.ready(() => {
       this.player_.addClass('vjs-shaka');
@@ -92,27 +93,72 @@ class Shaka extends Html5 {
       this.shaka_.getNetworkingEngine().registerRequestFilter(this.options_.licenseServerAuth);
     }
 
-    this.shaka_.addEventListener('buffering', function(e) {
-      if (e.buffering) me.trigger('waiting');
+    this.shaka_.addEventListener('buffering', function(event) {
+      if (event.buffering) me.trigger('waiting');
+    });
+
+    this.shaka_.addEventListener('error', function (event) {
+      me.retriggerError(event.detail);
     });
 
     this.shaka_.load(src).then(function() {
       me.initShakaMenus();
-    });
+    }).catch(me.retriggerError.bind(this));
   }
 
   dispose() {
-
-    this.shaka_.unload();
-    this.shaka_.destroy();
-
-    return Html5.prototype.dispose.apply(this);
+    if (this.shaka_) {
+      this.shaka_.unload();
+      this.shaka_.destroy();
+    }
   }
 
   initShakaMenus() {
     setupQualityTracks(this, this.shaka_);
     setupTextTracks(this, this.shaka_);
     setupAudioTracks(this, this.shaka_);
+  }
+
+  retriggerError(event) {
+    let code;
+
+    // map the shaka player error to the appropriate video.js error
+    if (event.message.indexOf('UNSUPPORTED') > -1 || event.message.indexOf('NOT_SUPPORTED') > -1) {
+      code = 4;
+    } else {
+      switch (event.category) {
+      case 1:
+        code = 2;
+        break;
+      case 2:
+      case 3:
+      case 4:
+        code = 3;
+        break;
+      case 5:
+        code = 1;
+        break;
+      case 6:
+        code = 5;
+        break;
+      case 7:
+      case 8:
+      case 9:
+        code = 0;
+        break;
+      }
+    }
+
+    this.vjsPlayer.error({
+      code,
+      message: `${event.code} - ${event.message}`
+    });
+
+    // only reset the shaka player in 10ms async, so that the rest of the
+    // calling function finishes
+    setTimeout(() => {
+      this.dispose();
+    }, 10);
   }
 
 }

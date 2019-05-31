@@ -70,12 +70,6 @@
     "src/",
     "test/"
   ],
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "npm run test"
-    }
-  },
   "lint-staged": {
     "*.js": [
       "vjsstandard --fix",
