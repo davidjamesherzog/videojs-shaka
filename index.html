@@ -8,20 +8,39 @@
 </head>
 <body>
   <video id="videojs-shaka-player" class="video-js vjs-default-skin" controls>
-    <source src="//vjs.zencdn.net/v/oceans.mp4" type='video/mp4'>
-    <source src="//vjs.zencdn.net/v/oceans.webm" type='video/webm'>
   </video>
-  <ul>
-    <li><a href="/test/debug.html">Run unit tests in browser.</a></li>
-    <li><a href="docs/api/">Read generated docs.</a></li>
-  </ul>
+  <br/>
+  <div>
+    <input id="stream" type="text" value="https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd" style="width: 750px;"></input>
+    <button id="play">Play</button>
+  </div>
+  <script src="node_modules/shaka-player/dist/shaka-player.compiled.debug.js"></script>
   <script src="node_modules/video.js/dist/video.js"></script>
   <script src="dist/videojs-shaka.js"></script>
   <script>
-    (function(window, videojs) {
-      var examplePlayer = window.examplePlayer = videojs('videojs-shaka-player');
-      var shaka = window.shaka = examplePlayer.shaka();
-    }(window, window.videojs));
+    var player = videojs('videojs-shaka-player', {
+      autoplay: true,
+      techOrder: ['shaka'],
+      width: 800,
+      height: 450,
+      shaka: {
+        debug: true
+      }
+    });
+    player.src([{
+      type: 'application/dash+xml',
+      src: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd'
+    }]);
+
+    var stream = document.getElementById('stream');
+    var play = document.getElementById('play');
+
+    play.addEventListener('click', function() {
+      player.src([{
+        type: 'application/dash+xml',
+        src: stream.value
+      }]);
+    });
   </script>
 </body>
 </html>

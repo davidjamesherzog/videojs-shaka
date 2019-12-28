@@ -37,7 +37,8 @@
     "watch": "npm-run-all -p watch:*",
     "watch:css": "npm run build:css -- -w",
     "watch:js": "npm run build:js -- -w",
-    "prepublishOnly": "npm-run-all build test:verify"
+    "prepublishOnly": "npm-run-all build test:verify",
+    "sample": "npm run build && http-server --p 3000"
   },
   "engines": {
     "node": ">=8",
@@ -82,10 +83,12 @@
   },
   "dependencies": {
     "global": "^4.3.2",
-    "video.js": "^6 || ^7"
+    "video.js": "^6 || ^7",
+    "shaka-player": "~2.4.7"
   },
   "devDependencies": {
     "@videojs/generator-helpers": "~1.0.0",
+    "http-server": "^0.12.0",
     "jsdoc": "BrandonOCasey/jsdoc#fix/security-issue",
     "karma": "^3.0.0",
     "postcss-cli": "^6.0.0",

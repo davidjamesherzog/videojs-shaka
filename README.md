@@ -41,6 +41,10 @@ This is the simplest case. Get the script in whatever way you prefer and include
     techOrder: ['shaka'],
     ...
   });
+  player.src([{
+    type: 'application/dash+xml',
+    src: '//path/to/some.mpd'
+  }]);
 </script>
 ```
 
@@ -54,6 +58,10 @@ If you want to enable the bitrate quality picker menu, you'll need to initialize
   });
 
   player.qualityPickerPlugin();
+  player.src([{
+    type: 'application/dash+xml',
+    src: '//path/to/some.mpd'
+  }]);
 </script>
 ```
 
@@ -75,6 +83,10 @@ Configure DEBUG logging level in the following manner by including the `shaka-pl
   });
 
   player.qualityPickerPlugin();
+  player.src([{
+    type: 'application/dash+xml',
+    src: '//path/to/some.mpd'
+  }]);
 </script>
 ```
 
@@ -109,6 +121,10 @@ Configure DRM in the following manner:
   });
 
   player.qualityPickerPlugin();
+  player.src([{
+    type: 'application/dash+xml',
+    src: '//path/to/some.mpd'
+  }]);
 </script>
 ```
 
@@ -132,9 +148,12 @@ If you need to set the DRM server after you initialize video.js prior to loading
   });
 
   player.qualityPickerPlugin();
+  player.src([{
+    type: 'application/dash+xml',
+    src: '//path/to/some.mpd'
+  }]);
 </script>
 ```
-
 
 ### `qualitytrackchange` Event
 
@@ -147,6 +166,16 @@ If you would like to know when a user switches video quality, you can register a
   });
 </script>
 ```
+
+## Sample App
+
+To run the sample app, you just need to start the development server with the following command:
+
+```bash
+$ npm run sample
+```
+
+Then just open the app at [http://localhost:3000/](http://localhost:3000/) 
 
 ## Special Thanks
 
