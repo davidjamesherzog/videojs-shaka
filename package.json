@@ -38,7 +38,7 @@
     "watch:css": "npm run build:css -- -w",
     "watch:js": "npm run build:js -- -w",
     "prepublishOnly": "npm-run-all build test:verify",
-    "sample": "npm run build && http-server --p 3000"
+    "sample": "npm run build && ./node_modules/http-server/bin/http-server --p 3000"
   },
   "engines": {
     "node": ">=8",
