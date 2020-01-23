@@ -41,7 +41,7 @@
       player.reset();
       player.qualityPickerPlugin();
       player.src([{
-        type: stream.value.endsWith('m3u8') ? 'application/dash+xml' : 'application/x-mpegURL',
+        type: stream.value.endsWith('m3u8') ? 'application/x-mpegURL' : 'application/dash+xml',
         src: stream.value
       }]);
     });
