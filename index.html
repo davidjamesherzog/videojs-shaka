@@ -14,6 +14,7 @@
     <input id="stream" type="text" value="https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd" style="width: 750px;"></input>
     <button id="play">Play</button>
   </div>
+  <script src="node_modules/mux.js/dist/mux.js"></script>
   <script src="node_modules/shaka-player/dist/shaka-player.compiled.debug.js"></script>
   <script src="node_modules/video.js/dist/video.js"></script>
   <script src="dist/videojs-shaka.js"></script>
@@ -37,8 +38,10 @@
     var play = document.getElementById('play');
 
     play.addEventListener('click', function() {
+      player.reset();
+      player.qualityPickerPlugin();
       player.src([{
-        type: 'application/dash+xml',
+        type: stream.value.endsWith('m3u8') ? 'application/x-mpegURL' : 'application/dash+xml',
         src: stream.value
       }]);
     });
