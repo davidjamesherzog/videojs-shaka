@@ -1,3 +1,8 @@
+## 0.4.0 (2020-02-02)
+* Add HLS support
+* Rename module file from `videojs-shaka.es.js` to `videojs-shaka.esm.js`
+* Add sample app
+
 ## 0.3.0 (2019-05-31)
 * Retrigger shaka errors to video.js errors
 
