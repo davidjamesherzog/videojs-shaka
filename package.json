@@ -3,7 +3,7 @@
   "version": "0.4.0",
   "description": "video.js shaka player tech",
   "main": "dist/videojs-shaka.cjs.js",
-  "module": "dist/videojs-shaka.esm.js",
+  "module": "dist/videojs-shaka.es.js",
   "browser": "dist/videojs-shaka.js",
   "generator-videojs-plugin": {
     "version": "7.6.1"
