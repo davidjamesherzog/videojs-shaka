@@ -25,7 +25,6 @@ class QualityMenu extends VjsMenu {
     });
 
     player.on('qualitytrackchange', function() {
-      console.warn('hide menu');
       me.hide();
     });
   }
