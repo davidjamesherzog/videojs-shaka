@@ -1,3 +1,6 @@
+## 0.4.1 (2020-03-06)
+* Previously selected quality menu items not deselected on mobile (#13)
+
 ## 0.4.0 (2020-02-02)
 * Add HLS support
 * Add sample app
