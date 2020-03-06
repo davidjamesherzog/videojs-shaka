@@ -23,14 +23,17 @@ class QualityMenu extends VjsMenu {
         }
       });
     });
+
+    player.on('qualitytrackchange', function() {
+      me.hide();
+    });
   }
 
   addItem(component) {
     super.addItem(component);
 
-    component.on('click', () => {
+    component.on(['tap', 'click'], () => {
       const children = this.children();
-
       for (let i = 0; i < children.length; i++) {
         const child = children[i];
         if (component !== child) {
