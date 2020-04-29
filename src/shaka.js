@@ -91,7 +91,7 @@ class Shaka extends Html5 {
     }
 
     this.shaka_.addEventListener('buffering', function(event) {
-      if (event.buffering) me.trigger('waiting');
+      if (event.buffering) me.vjsPlayer.trigger('waiting');
     });
 
     this.shaka_.addEventListener('error', function(event) {

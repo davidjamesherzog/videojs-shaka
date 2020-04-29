@@ -92,6 +92,10 @@ export default function setupQualityTracks(tech, shaka) {
       });
 
       shaka.selectVariantTrack(tracks[0], /* clearBuffer */ true);
+
+      // fire `variantchanged` event
+      const event = new window.shaka.util.FakeEvent('variantchanged');
+      shaka.dispatchEvent(event);
     }
   });
 }
