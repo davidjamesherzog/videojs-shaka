@@ -1,5 +1,3 @@
-import videojs from 'video.js';
-
 function find(l, f) {
   for (let i = 0; i < l.length; i++) {
     if (f(l[i])) {
@@ -16,7 +14,7 @@ function find(l, f) {
  *
  * @private
  */
-function attachDashTextTracksToVideojs(tech, shaka, tracks) {
+function attachDashTextTracksToVideojs(tech, shakaPlayer, tracks) {
 
   const trackDictionary = [];
 
@@ -78,10 +76,10 @@ function attachDashTextTracksToVideojs(tech, shaka, tracks) {
 
     // If the text track has changed, then set it in shaka
     if (dashTrackToActivate) {
-      shaka.selectTextTrack(dashTrackToActivate);
-      shaka.setTextTrackVisibility(true);
+      shakaPlayer.selectTextTrack(dashTrackToActivate);
+      shakaPlayer.setTextTrackVisibility(true);
     } else {
-      shaka.setTextTrackVisibility(false);
+      shakaPlayer.setTextTrackVisibility(false);
     }
 
   }
@@ -90,7 +88,7 @@ function attachDashTextTracksToVideojs(tech, shaka, tracks) {
   tech.textTracks().on('change', updateActiveDashTextTrack);
 
   // Cleanup event listeners whenever we start loading a new source
-  shaka.addEventListener('unloading', () => {
+  shakaPlayer.addEventListener('unloading', () => {
     tech.textTracks().off('change', updateActiveDashTextTrack);
   });
 
@@ -100,7 +98,7 @@ function attachDashTextTracksToVideojs(tech, shaka, tracks) {
   return tracksAttached;
 }
 
-export default function setupTextTracks(tech, shaka) {
+export default function setupTextTracks(tech, shakaPlayer) {
 
   // Store the tracks that we've added so we can remove them later.
   let dashTracksAttachedToVideoJs = [];
@@ -123,9 +121,9 @@ export default function setupTextTracks(tech, shaka) {
     }
 
     // Save the tracks so we can remove them later
-    dashTracksAttachedToVideoJs = attachDashTextTracksToVideojs(tech, shaka, tracks);
+    dashTracksAttachedToVideoJs = attachDashTextTracksToVideojs(tech, shakaPlayer, tracks);
   }
 
-  handleTextTracksAdded(shaka.getTextTracks());
+  handleTextTracksAdded(shakaPlayer.getTextTracks());
 
 }

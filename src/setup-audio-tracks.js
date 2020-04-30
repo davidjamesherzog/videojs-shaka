@@ -9,7 +9,7 @@ import videojs from 'video.js';
  * @param {videojs} tech the videojs player tech instance
  * @param {videojs.tech} tech the videojs tech being used
  */
-function handleAudioTracksAdded(tech, shaka, tracks) {
+function handleAudioTracksAdded(tech, shakaPlayer, tracks) {
 
   const videojsAudioTracks = tech.audioTracks();
 
@@ -75,7 +75,7 @@ function handleAudioTracksAdded(tech, shaka, tracks) {
           tech.trigger('shakaaudiotrackchange', {
             language: dashAudioTrack.language
           });
-          shaka.selectAudioLanguage(dashAudioTrack.language, dashAudioTrack.role);
+          shakaPlayer.selectAudioLanguage(dashAudioTrack.language, dashAudioTrack.role);
 
           // Stop looping
           continue;
@@ -86,11 +86,11 @@ function handleAudioTracksAdded(tech, shaka, tracks) {
   };
 
   videojsAudioTracks.addEventListener('change', audioTracksChangeHandler);
-  shaka.addEventListener('unloading', () => {
+  shakaPlayer.addEventListener('unloading', () => {
     videojsAudioTracks.removeEventListener('change', audioTracksChangeHandler);
   });
 }
 
-export default function setupAudioTracks(tech, shaka) {
-  handleAudioTracksAdded(tech, shaka, shaka.getAudioLanguagesAndRoles());
+export default function setupAudioTracks(tech, shakaPlayer) {
+  handleAudioTracksAdded(tech, shakaPlayer, shakaPlayer.getAudioLanguagesAndRoles());
 }

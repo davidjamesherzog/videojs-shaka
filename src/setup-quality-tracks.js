@@ -1,7 +1,7 @@
-function _getQuality(tech, shaka) {
+function _getQuality(tech, shakaPlayer) {
 
   const tracks = [];
-  const levels = shaka.getVariantTracks().filter(function(t) {
+  const levels = shakaPlayer.getVariantTracks().filter(function(t) {
     return t.type === 'variant';
   });
 
@@ -69,16 +69,16 @@ function _getQuality(tech, shaka) {
   return sortedTracks;
 }
 
-export default function setupQualityTracks(tech, shaka) {
+export default function setupQualityTracks(tech, shakaPlayer) {
 
   tech.trigger('loadedqualitydata', {
     qualityData: {
-      video: _getQuality(tech, shaka)
+      video: _getQuality(tech, shakaPlayer)
     },
     qualitySwitchCallback: function(id, type) {
 
       // Update the adaptation.
-      shaka.configure({
+      shakaPlayer.configure({
         abr: {
           enabled: id === -1
         }
@@ -87,11 +87,15 @@ export default function setupQualityTracks(tech, shaka) {
       // Is auto?
       if (id === -1) return;
 
-      const tracks = shaka.getVariantTracks().filter(function(t) {
+      const tracks = shakaPlayer.getVariantTracks().filter(function(t) {
         return t.id === id && t.type === 'variant';
       });
 
-      shaka.selectVariantTrack(tracks[0], /* clearBuffer */ true);
+      shakaPlayer.selectVariantTrack(tracks[0], /* clearBuffer */ true);
+
+      // fire `variantchanged` event
+      const event = new shaka.util.FakeEvent('variantchanged');
+      shakaPlayer.dispatchEvent(event);
     }
   });
 }
