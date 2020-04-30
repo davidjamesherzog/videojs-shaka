@@ -1,3 +1,7 @@
+## 0.4.2 (2020-04-30)
+* `variantchanged` event not firing when bitrate changed by user (#18)
+* Buffering event not triggering `waiting` event (#17)
+
 ## 0.4.1 (2020-03-06)
 * Previously selected quality menu items not deselected on mobile (#13)
 
