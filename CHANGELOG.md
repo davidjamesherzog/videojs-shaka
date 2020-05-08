@@ -1,3 +1,6 @@
+## 0.4.3 (2020-05-08)
+* Check if event.message exists (#21)
+
 ## 0.4.2 (2020-04-30)
 * `variantchanged` event not firing when bitrate changed by user (#18)
 * Buffering event not triggering `waiting` event (#17)
