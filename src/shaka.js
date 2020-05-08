@@ -120,7 +120,8 @@ class Shaka extends Html5 {
     let code;
 
     // map the shaka player error to the appropriate video.js error
-    if (event.message.indexOf('UNSUPPORTED') > -1 || event.message.indexOf('NOT_SUPPORTED') > -1) {
+    if (event.message &&
+      (event.message.indexOf('UNSUPPORTED') > -1 || event.message.indexOf('NOT_SUPPORTED') > -1)) {
       code = 4;
     } else {
       switch (event.category) {
