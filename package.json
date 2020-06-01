@@ -1,6 +1,6 @@
 {
   "name": "videojs-shaka",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "video.js shaka player tech",
   "main": "dist/videojs-shaka.cjs.js",
   "module": "dist/videojs-shaka.es.js",

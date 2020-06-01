@@ -1,3 +1,6 @@
+## 0.4.4 (2020-06-01)
+* Fix FakeEvent is not a constructor error (#23)
+
 ## 0.4.3 (2020-05-08)
 * Check if event.message exists (#21)
 
