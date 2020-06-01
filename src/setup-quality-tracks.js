@@ -96,7 +96,6 @@ export default function setupQualityTracks(tech, shakaPlayer) {
       // fire `variantchanged` event - only supports debug mode right now
       // todo - need to figure out how to do this in non debug mode
       if (shaka.util.FakeEvent) {
-        console.log('dipatch fake event');
         const event = new shaka.util.FakeEvent('variantchanged');
         shakaPlayer.dispatchEvent(event);
       }
