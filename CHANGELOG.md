@@ -1,3 +1,7 @@
+## 0.4.5 (2020-07-17)
+* Show label for text track if available (#26)
+* Bump lodash from 4.17.15 to 4.17.19 (#24)
+
 ## 0.4.4 (2020-06-01)
 * Fix FakeEvent is not a constructor error (#23)
 
