@@ -25,7 +25,7 @@ function attachDashTextTracksToVideojs(tech, shakaPlayer, tracks) {
     .map((track) => ({
       dashTrack: track,
       trackConfig: {
-        label: track.language,
+        label: track.label || track.language,
         language: track.language,
         srclang: track.language,
         kind: track.kind
