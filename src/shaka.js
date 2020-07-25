@@ -182,4 +182,32 @@ Shaka.canPlaySource = function(source, tech) {
   return '';
 };
 
+Shaka.manifestSourceHandler = {};
+Shaka.manifestSourceHandler.canHandleSource = function(source, options) {
+    // If a type was provided we should rely on that
+    if (source.type) {
+        return Shaka.manifestSourceHandler.canPlayType(source.type);
+    
+    } else if (source.src) {
+        const pattern = /(\.mpd|\.m3u8)/i;
+        if (pattern.test(source.src)) {
+            return 'probably';
+        }
+    }
+    
+    return '';
+};
+Shaka.manifestSourceHandler.canPlayType = function(type) {
+    const pattern = /^(application\/dash\+xml|application\/x-mpegURL|application\/vnd\.apple\.mpegurl)/i;
+    
+    if (pattern.test(type)) {
+        return 'probably';
+    }
+    
+    return '';
+}
+Shaka.manifestSourceHandler.handleSource = function(source, tech, options) {
+  tech.setSrc(source.src);
+}
+
 export default Shaka;

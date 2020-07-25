@@ -7,6 +7,7 @@
   <link href="dist/videojs-shaka.css" rel="stylesheet">
 </head>
 <body>
+  <p>Triggered via code</p>
   <video id="videojs-shaka-player" class="video-js vjs-default-skin" controls>
   </video>
   <br/>
@@ -14,6 +15,26 @@
     <input id="stream" type="text" value="https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd" style="width: 750px;"></input>
     <button id="play">Play</button>
   </div>
+  
+  <p>Dash via auto setup</p>
+    <video class="video-js vjs-default-skin" controls
+      data-setup='
+          {
+            "techOrder": [
+              "shaka"
+            ],
+            "shaka": {
+              "debug": true
+            }
+          }
+      '
+    >
+        <source
+            src="https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd"
+            type="application/dash+xml"
+        />
+    </video>
+  
   <script src="node_modules/mux.js/dist/mux.js"></script>
   <script src="node_modules/shaka-player/dist/shaka-player.compiled.debug.js"></script>
   <script src="node_modules/video.js/dist/video.js"></script>
