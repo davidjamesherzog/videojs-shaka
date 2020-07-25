@@ -1,24 +1,16 @@
-if Vagrant::Util::Platform.windows? then
-  def running_in_admin_mode?
-    (`reg query HKU\\S-1-5-19 2>&1` =~ /ERROR/).nil?
-  end
- 
-  unless running_in_admin_mode?
-    puts "This vagrant makes use of SymLinks to the host. On Windows, Administrative privileges are required to create symlinks (mklink.exe). Try again from an Administrative command prompt."
-    exit 1
-  end
-end
-
 Vagrant.configure("2") do |config|
     config.vm.box = "hashicorp/bionic64"
     
     config.vm.provider "virtualbox" do |v|
       v.name = "videojs-shaka"
-      v.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
     end
     
     config.vm.network "forwarded_port", guest: 3000, host: 3000
     config.vm.provision :shell, path: "provision/system.sh"
     config.vm.synced_folder ".", "/vagrant", disabled: true
-    config.vm.synced_folder "../", "/vagrant"
+    if Vagrant::Util::Platform.windows? then
+        config.vm.synced_folder "../", "/vagrant", type: 'smb', mount_options: ["mfsymlinks"]
+    else
+        config.vm.synced_folder "../", "/vagrant"
+    end
 end
