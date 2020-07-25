@@ -8,5 +8,10 @@ To run tests:
         vagrant up
         vagrant ssh
         cd /vagrant
+        
+        # note: `npm install` is slow - if you are using eclipse, it is helpful to
+        # exclude node_modules from the package explorer - let it complete because
+        # cancelling execution mid installation will cause you nightmares
+        
         npm install
         npm run sample
