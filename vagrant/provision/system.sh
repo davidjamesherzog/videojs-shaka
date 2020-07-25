@@ -8,3 +8,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 apt-get install -y build-essential nodejs
+
+cd /vagrant
+su vagrant
+npm ci

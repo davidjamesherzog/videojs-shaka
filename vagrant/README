@@ -1,17 +1,13 @@
 CREATES A VAGRANT ENVIRONMENT TO FACILITATE LOCAL TESTING
 
+note: `vagrant up` is slow - go make coffee
+note: if you are using eclipse, exclude node_modules from the package explorer
+
 ========
 USAGE:
 ========
-To run tests:
-    cd to this directory and then issue the following commands:
+    cd to this directory and then issue the following commands:    
         vagrant up
         vagrant ssh
         cd /vagrant
-        
-        # note: `npm install` is slow - if you are using eclipse, it is helpful to
-        # exclude node_modules from the package explorer - let it complete because
-        # cancelling execution mid installation will cause you nightmares
-        
-        npm install
         npm run sample
