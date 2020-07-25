@@ -25,6 +25,7 @@ npm-debug.log*
 # Dependency directories
 bower_components/
 node_modules/
+/node_modules
 
 # Build-related directories
 dist/
