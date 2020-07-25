@@ -11,4 +11,4 @@ apt-get install -y build-essential nodejs
 
 cd /vagrant
 su vagrant
-npm ci --no-bin-links
+npm ci
