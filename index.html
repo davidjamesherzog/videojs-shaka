@@ -34,6 +34,25 @@
             type="application/dash+xml"
         />
     </video>
+
+  <p>HLS via auto setup</p>
+    <video class="video-js vjs-default-skin" controls
+      data-setup='
+          {
+            "techOrder": [
+              "shaka"
+            ],
+            "shaka": {
+              "debug": true
+            }
+          }
+      '
+    >
+        <source
+            src="https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8"
+            type="application/vnd.apple.mpegurl"
+        />
+    </video>
   
   <script src="node_modules/mux.js/dist/mux.js"></script>
   <script src="node_modules/shaka-player/dist/shaka-player.compiled.debug.js"></script>

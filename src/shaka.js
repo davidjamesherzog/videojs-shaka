@@ -171,18 +171,8 @@ Shaka.isSupported = function() {
   return !!window.MediaSource;
 };
 
-Shaka.canPlaySource = function(source, tech) {
-
-  const dashTypeRE = /^(application\/dash\+xml|application\/x-mpegURL)/i;
-
-  if (dashTypeRE.test(source.type)) {
-    return 'probably';
-  }
-
-  return '';
-};
-
 Shaka.manifestSourceHandler = {};
+
 Shaka.manifestSourceHandler.canHandleSource = function(source, options) {
     // If a type was provided we should rely on that
     if (source.type) {
@@ -197,17 +187,19 @@ Shaka.manifestSourceHandler.canHandleSource = function(source, options) {
     
     return '';
 };
+
 Shaka.manifestSourceHandler.canPlayType = function(type) {
-    const pattern = /^(application\/dash\+xml|application\/x-mpegURL|application\/vnd\.apple\.mpegurl)/i;
+    const pattern = /^(application\/dash\+xml|application\/x-mpegURL|application\/vnd.apple.mpegurl)/i;
     
     if (pattern.test(type)) {
         return 'probably';
     }
     
     return '';
-}
+};
+
 Shaka.manifestSourceHandler.handleSource = function(source, tech, options) {
   tech.setSrc(source.src);
-}
+};
 
 export default Shaka;
