@@ -14,8 +14,6 @@ Vagrant.configure("2") do |config|
     
     config.vm.provider "virtualbox" do |v|
       v.name = "videojs-shaka"
-      v.memory = 4096
-      v.cpus = 4
       v.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
     end
     
