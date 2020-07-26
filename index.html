@@ -78,6 +78,30 @@
         />
     </video>
     
+    <p>Dash (enableDash: false) + HLS via auto setup</p>
+    <video class="video-js vjs-default-skin" controls  width="800" height="450"
+      data-setup='
+          {
+            "techOrder": [
+              "shaka"
+            ],
+            "shaka": {
+              "debug": true,
+              "enableDash": false
+            }
+          }
+      '
+    >
+        <source
+            src="https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd"
+            type="application/dash+xml"
+        />
+        <source
+            src="https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8"
+            type="application/vnd.apple.mpegurl"
+        />
+    </video>
+    
     <p>HLS + Dash via auto setup</p>
     <video class="video-js vjs-default-skin" controls  width="800" height="450"
       data-setup='
@@ -87,6 +111,30 @@
             ],
             "shaka": {
               "debug": true
+            }
+          }
+      '
+    >
+        <source
+            src="https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8"
+            type="application/vnd.apple.mpegurl"
+        />
+        <source
+            src="https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd"
+            type="application/dash+xml"
+        />
+    </video>
+    
+    <p>HLS (enableHls: false) + Dash via auto setup</p>
+    <video class="video-js vjs-default-skin" controls  width="800" height="450"
+      data-setup='
+          {
+            "techOrder": [
+              "shaka"
+            ],
+            "shaka": {
+              "debug": true,
+              "enableHls": false
             }
           }
       '
