@@ -212,8 +212,10 @@ Shaka.manifestSourceHandler = {};
 Shaka.manifestSourceHandler.canHandleSource = function(source, options = {}, yes = 'maybe') {
     const localOptions = videojs.mergeOptions(videojs.options, options);
     var type = '';
-    if (!source.src || /^blob\:/i.test(source.src)) {
-        /* do nothing */
+    if (!source.src) {
+        throw 'Invalid source "' + source.src + '" encountered.  The src attribute is required!'
+    } else if (/^blob\:/i.test(source.src)) {
+        throw 'Invalid source "' + source.src + '" encountered.  We cannot handle blob urls!'
     } else if (source.type) {
         type = source.type;
     } else {
