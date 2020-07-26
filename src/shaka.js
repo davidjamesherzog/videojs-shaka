@@ -203,7 +203,7 @@ Shaka.manifestSourceHandler.canUseDashType = function(type, options = {}) {
     const enableDash = (localOptions.shaka.enableDash == null) ? !videojs.browser.IS_ANY_SAFARI : localOptions.shaka.enableDash;
     const pattern = /^application\/dash\+xml/i;
     const result = enableDash && pattern.test(type);
-    shaka.log.debug('Shaka.manifestSourceHandler.canUseDashType | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
+    shaka.log.debug('Shaka.manifestSourceHandler.canUseDashType | "' + result + '" | ' + enableDash + ' | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
     return result;
 }
 
@@ -231,7 +231,7 @@ Shaka.manifestSourceHandler.canUseHlsType = function(type, options = {}) {
     });
 
     const result = enableHls && canPlayType;
-    shaka.log.debug('Shaka.manifestSourceHandler.canUseHlsType | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
+    shaka.log.debug('Shaka.manifestSourceHandler.canUseHlsType | "' + result + '" | ' + enableHls + ' | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
     return result;
 }
 
