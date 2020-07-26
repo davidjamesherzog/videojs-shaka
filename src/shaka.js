@@ -199,9 +199,9 @@ Shaka.canPlayType = function(type) {
  *        The options passed to the tech
  * @return {string} 'probably', 'maybe', or '' (empty string)
  */
-Shaka.canPlaySource = function(source, options) {
+Shaka.canPlaySource = function(source, options = {}) {
   const localOptions = videojs.mergeOptions(videojs.options, {shaka: options});
-  const result = Shaka.manifestSourceHandler.canHandleSource(source, localOptions);
+  const result = Shaka.manifestSourceHandler.canHandleSource(source, localOptions, 'probably');
   shaka.log.debug('Shaka.canPlaySource | ' + result + ' | ' + JSON.stringify(source, null, 2) + ' | ' + JSON.stringify(options, null, 2) + ' | ' + JSON.stringify(localOptions, null, 2));
   return result;
 };
@@ -209,7 +209,7 @@ Shaka.canPlaySource = function(source, options) {
 
 Shaka.manifestSourceHandler = {};
 
-Shaka.manifestSourceHandler.canHandleSource = function(source, options = {}) {
+Shaka.manifestSourceHandler.canHandleSource = function(source, options = {}, yes = 'maybe') {
     const localOptions = videojs.mergeOptions(videojs.options, options);
     var type = '';
     if (!source.src || /^blob\:/i.test(source.src)) {
@@ -223,7 +223,7 @@ Shaka.manifestSourceHandler.canHandleSource = function(source, options = {}) {
             type = 'application/vnd.apple.mpegurl'
         }
     }
-    const result = Shaka.manifestSourceHandler.canPlayType(type, localOptions);
+    const result = Shaka.manifestSourceHandler.canPlayType(type, localOptions, yes);
     shaka.log.debug('Shaka.manifestSourceHandler.canHandleSource | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
     return result;
 };
@@ -265,13 +265,13 @@ Shaka.manifestSourceHandler.canUseHlsType = function(type, options = {}) {
     return result;
 }
 
-Shaka.manifestSourceHandler.canPlayType = function(type, options = {}) {
+Shaka.manifestSourceHandler.canPlayType = function(type, options = {}, yes = 'maybe') {
     const localOptions = videojs.mergeOptions(videojs.options, options);
     const overrideNative = localOptions.shaka.overrideNative;
     const canUseDash = Shaka.manifestSourceHandler.canUseDashType(type, localOptions);
     const canUseHls = Shaka.manifestSourceHandler.canUseHlsType(type, localOptions);
     const canUse = (canUseDash || canUseHls) && Shaka.isSupported() && (!Shaka.supportsTypeNatively(type) || overrideNative);
-    const result = canUse ? 'maybe' : '';
+    const result = canUse ? yes : '';
     shaka.log.debug('Shaka.manifestSourceHandler.canPlayType | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
     return result;
 };
