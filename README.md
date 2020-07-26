@@ -155,6 +155,12 @@ If you need to set the DRM server after you initialize video.js prior to loading
 </script>
 ```
 
+### Playback configuration
+
+enableDash: null, false, or true (default) - null is a JSON serializable shortcut for `!videojs.browser.IS_ANY_SAFARI`
+enableHls: false, true (default)
+overrideNative: false, true - defaults to `!videojs.browser.IS_ANY_SAFARI` per videojs (https://github.com/videojs/http-streaming/issues/912)
+
 ### `qualitytrackchange` Event
 
 If you would like to know when a user switches video quality, you can register an event listener for `qualitytrackchange`.  The quality track object will be returned to you.
