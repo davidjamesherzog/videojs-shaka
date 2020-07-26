@@ -170,7 +170,9 @@ Shaka.isSupported = function() {
 
 Shaka.supportsTypeNatively = function(type) {
     const video = document.createElement('video');
-    return video.canPlayType(type) != '';
+    const result = video.canPlayType(type) != '';
+    shaka.log.debug('Shaka.supportsTypeNatively | ' + type + ' | ' + result);
+    return result;
 };
 
 Shaka.manifestSourceHandler = {};
@@ -190,7 +192,7 @@ Shaka.manifestSourceHandler.canHandleSource = function(source, options = {}) {
         }
     }
     const result = Shaka.manifestSourceHandler.canPlayType(type, localOptions);
-    shaka.log.debug('Shaka.manifestSourceHandler.canHandleSource | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions));
+    shaka.log.debug('Shaka.manifestSourceHandler.canHandleSource | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
     return result;
 };
 
@@ -200,7 +202,7 @@ Shaka.manifestSourceHandler.canPlayType = function(type, options = {}) {
     const pattern = /^(application\/dash\+xml|application\/x-mpegURL|application\/vnd.apple.mpegurl)/i;
     const canUse = pattern.test(type) && Shaka.isSupported() && (!Shaka.supportsTypeNatively(type) || overrideNative);
     const result = canUse ? 'maybe' : '';
-    shaka.log.debug('Shaka.manifestSourceHandler.canPlayType | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions));
+    shaka.log.debug('Shaka.manifestSourceHandler.canPlayType | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
     return result;
 };
 
