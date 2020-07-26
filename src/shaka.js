@@ -210,8 +210,27 @@ Shaka.manifestSourceHandler.canUseDashType = function(type, options = {}) {
 Shaka.manifestSourceHandler.canUseHlsType = function(type, options = {}) {
     const localOptions = videojs.mergeOptions(videojs.options, options);
     const enableHls = localOptions.shaka.enableHls;
-    const pattern = /^(application\/x-mpegURL|application\/vnd.apple.mpegurl)/i;
-    const result = enableHls && pattern.test(type);
+    
+    // HLS manifests can go by many mime-types
+    const choices = [
+        // Apple santioned
+        'application/vnd.apple.mpegurl',
+        // Apple sanctioned for backwards compatibility
+        'audio/mpegurl',
+        // Very common
+        'audio/x-mpegurl',
+        // Very common
+        'application/x-mpegurl',
+        // Included for completeness
+        'video/x-mpegurl',
+        'video/mpegurl',
+        'application/mpegurl'
+    ];
+    const canPlayType = choices.some(function(choice) {
+        return choice == type;
+    });
+
+    const result = enableHls && canPlayType;
     shaka.log.debug('Shaka.manifestSourceHandler.canUseHlsType | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
     return result;
 }
