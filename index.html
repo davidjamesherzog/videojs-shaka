@@ -17,7 +17,7 @@
     <p>(try hls with https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8)</p>
   </div>
   
-  <p>Dash via auto setup</p>
+  <p>Dash via auto setup with autoInitQualityPicker: true</p>
     <video class="video-js vjs-default-skin" controls width="800" height="450"
       data-setup='
           {
@@ -25,6 +25,7 @@
               "shaka"
             ],
             "shaka": {
+              "autoInitQualityPicker": true,
               "debug": true
             }
           }
@@ -36,7 +37,7 @@
         />
     </video>
 
-  <p>HLS via auto setup</p>
+  <p>HLS via auto setup with autoInitQualityPicker: true</p>
     <video class="video-js vjs-default-skin" controls  width="800" height="450"
       data-setup='
           {
@@ -44,6 +45,7 @@
               "shaka"
             ],
             "shaka": {
+              "autoInitQualityPicker": true,
               "debug": true
             }
           }

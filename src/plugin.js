@@ -9,6 +9,7 @@ shaka.polyfill.installAll();
 
 // Create default options
 const defaults = {
+    autoInitQualityPicker: false,
     debug: false,
     drm: {},
     enableDash: true,

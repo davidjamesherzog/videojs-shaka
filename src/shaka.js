@@ -50,12 +50,12 @@ class Shaka extends Html5 {
     this.player_.ready(() => {
       this.player_.addClass('vjs-shaka');
       this.isReady = true;
-      this.autoQualityPicker();
+      this.initQualityPicker();
     });
   }
   
-  autoQualityPicker() {
-      if (this.isReady) {
+  initQualityPicker() {
+      if (this.isReady && this.vjsPlayer.options_.shaka.autoInitQualityPicker) {
           this.vjsPlayer.qualityPickerPlugin();
       }
   }
@@ -106,7 +106,7 @@ class Shaka extends Html5 {
       me.retriggerError(event.detail);
     });
     
-    this.autoQualityPicker()
+    this.initQualityPicker()
     this.shaka_.load(src).then(function() {
       me.initShakaMenus();
     }).catch(me.retriggerError.bind(this));
