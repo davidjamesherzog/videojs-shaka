@@ -1,3 +1,13 @@
+## Unreleased (2020-07-26)
+* Added vagrant to ease the process of running the local demo for interactive development
+* Added compatibility with video.js v7.9.2
+* Verified compatibility with shaka-player 3.0.1
+* Added configuration options enableDash, enableHls, and overrideNative.
+* Added source handler - this replaces the default video.js source handlers
+* Deferred support check to shaka.Player.isBrowserSupported()
+* Added additional HLS mimetypes likely to be encountered per video.js
+* Added demos of new features
+
 ## 0.4.5 (2020-07-17)
 * Show label for text track if available (#26)
 * Bump lodash from 4.17.15 to 4.17.19 (#24)
