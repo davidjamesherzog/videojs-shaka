@@ -11,7 +11,7 @@ shaka.polyfill.installAll();
 const defaults = {
     debug: false,
     drm: {},
-    enableDash: !videojs.browser.IS_ANY_SAFARI,
+    enableDash: true,
     enableHls: true,
     overrideNative: !videojs.browser.IS_ANY_SAFARI
 }
