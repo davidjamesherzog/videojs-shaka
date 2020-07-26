@@ -10,6 +10,8 @@ Make sure you have Node.js 8 or higher and npm installed.
 1. Install dependencies: `npm install`
 1. Run a development server: `npm start`
 
+Note: there is a vagrant configuration packaged with the project to make this easy
+
 ### Making Changes
 
 Refer to the [video.js plugin conventions][conventions] for more detail on best practices and tooling for video.js plugin authorship.
