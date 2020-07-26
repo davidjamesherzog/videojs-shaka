@@ -52,9 +52,6 @@ class Shaka extends Html5 {
   createEl() {
     this.el_ = Html5.prototype.createEl.apply(this, arguments);
 
-    // Install built-in polyfills to patch browser incompatibilities.
-    shaka.polyfill.installAll();
-
     // set debug log level
     if (shaka.log) {
       if (this.options_.debug) {
@@ -168,37 +165,47 @@ Shaka.defaultState = {};
 Shaka.VERSION = VERSION;
 
 Shaka.isSupported = function() {
-  return !!window.MediaSource;
+  return shaka.Player.isBrowserSupported();
+};
+
+Shaka.supportsTypeNatively = function(type) {
+    const video = document.createElement('video');
+    return video.canPlayType(type) != '';
 };
 
 Shaka.manifestSourceHandler = {};
 
-Shaka.manifestSourceHandler.canHandleSource = function(source, options) {
-    // If a type was provided we should rely on that
-    if (source.type) {
-        return Shaka.manifestSourceHandler.canPlayType(source.type);
-    
-    } else if (source.src) {
-        const pattern = /(\.mpd|\.m3u8)/i;
-        if (pattern.test(source.src)) {
-            return 'probably';
+Shaka.manifestSourceHandler.canHandleSource = function(source, options = {}) {
+    const localOptions = videojs.mergeOptions(videojs.options, options);
+    var type = '';
+    if (!source.src || /^blob\:/i.test(source.src)) {
+        /* do nothing */
+    } else if (source.type) {
+        type = source.type;
+    } else {
+        if (/\.mpd$/i.test(source.src)) {
+            type = 'application/dash+xml'
+        } else if (/\.m3u8$/i.test(source.src)) {
+            type = 'application/vnd.apple.mpegurl'
         }
     }
-    
-    return '';
+    const result = Shaka.manifestSourceHandler.canPlayType(type, localOptions);
+    shaka.log.debug('Shaka.manifestSourceHandler.canHandleSource | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions));
+    return result;
 };
 
-Shaka.manifestSourceHandler.canPlayType = function(type) {
+Shaka.manifestSourceHandler.canPlayType = function(type, options = {}) {
+    const localOptions = videojs.mergeOptions(videojs.options, options);
+    const overrideNative = localOptions.shaka.overrideNative;
     const pattern = /^(application\/dash\+xml|application\/x-mpegURL|application\/vnd.apple.mpegurl)/i;
-    
-    if (pattern.test(type)) {
-        return 'probably';
-    }
-    
-    return '';
+    const canUse = pattern.test(type) && Shaka.isSupported() && (!Shaka.supportsTypeNatively(type) || overrideNative);
+    const result = canUse ? 'maybe' : '';
+    shaka.log.debug('Shaka.manifestSourceHandler.canPlayType | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions));
+    return result;
 };
 
 Shaka.manifestSourceHandler.handleSource = function(source, tech, options) {
+  shaka.log.debug('Shaka.manifestSourceHandler.handleSource: ' + source.src);
   tech.setSrc(source.src);
 };
 
