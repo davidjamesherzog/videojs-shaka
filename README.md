@@ -183,6 +183,8 @@ $ npm run sample
 
 Then just open the app at [http://localhost:3000/](http://localhost:3000/) 
 
+Note: there is a vagrant box available that provides a suitable runtime environment
+
 ## Special Thanks
 
 This library wasn't possible without leveraging the following libraries that were used to create this.
