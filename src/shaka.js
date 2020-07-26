@@ -200,7 +200,7 @@ Shaka.canPlayType = function(type) {
  * @return {string} 'probably', 'maybe', or '' (empty string)
  */
 Shaka.canPlaySource = function(source, options = {}) {
-  const localOptions = videojs.mergeOptions(videojs.options, {shaka: options});
+  const localOptions = {shaka: options};
   const result = Shaka.manifestSourceHandler.canHandleSource(source, localOptions, 'probably');
   shaka.log.debug('Shaka.canPlaySource | ' + result + ' | ' + JSON.stringify(source, null, 2) + ' | ' + JSON.stringify(options, null, 2) + ' | ' + JSON.stringify(localOptions, null, 2));
   return result;
