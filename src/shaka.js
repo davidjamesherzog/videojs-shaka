@@ -200,7 +200,7 @@ Shaka.manifestSourceHandler.canHandleSource = function(source, options = {}) {
 
 Shaka.manifestSourceHandler.canUseDashType = function(type, options = {}) {
     const localOptions = videojs.mergeOptions(videojs.options, options);
-    const enableDash = localOptions.shaka.enableDash;
+    const enableDash = (localOptions.shaka.enableDash == null) ? !videojs.browser.IS_ANY_SAFARI : localOptions.shaka.enableDash;
     const pattern = /^application\/dash\+xml/i;
     const result = enableDash && pattern.test(type);
     shaka.log.debug('Shaka.manifestSourceHandler.canUseDashType | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
