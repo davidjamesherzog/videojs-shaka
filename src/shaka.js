@@ -43,6 +43,8 @@ class Shaka extends Html5 {
     super(options, ready);
 
     this.vjsPlayer = videojs(options.playerId);
+    
+    shaka.log.debug('Shaka.constructor | ' + JSON.stringify(this.vjsPlayer.options_, null, 2));
 
     this.player_.ready(() => {
       this.player_.addClass('vjs-shaka');
@@ -68,8 +70,8 @@ class Shaka extends Html5 {
   }
 
   setSrc(src) {
-
     const me = this;
+    shaka.log.debug('Shaka.setSrc | ' + src + ' | ' + JSON.stringify(me.options_, null, 2));
 
     let drm;
     if (typeof this.options_.drm === 'function') {
