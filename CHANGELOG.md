@@ -7,6 +7,7 @@
 * Deferred support check to shaka.Player.isBrowserSupported()
 * Added additional HLS mimetypes likely to be encountered per video.js
 * Added demos of new features
+* Added option to automatically initialize the quality picker
 
 ## 0.4.5 (2020-07-17)
 * Show label for text track if available (#26)
