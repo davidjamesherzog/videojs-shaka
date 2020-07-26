@@ -198,11 +198,30 @@ Shaka.manifestSourceHandler.canHandleSource = function(source, options = {}) {
     return result;
 };
 
+Shaka.manifestSourceHandler.canUseDashType = function(type, options = {}) {
+    const localOptions = videojs.mergeOptions(videojs.options, options);
+    const enableDash = localOptions.shaka.enableDash;
+    const pattern = /^application\/dash\+xml/i;
+    const result = enableDash && pattern.test(type);
+    shaka.log.debug('Shaka.manifestSourceHandler.canUseDashType | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
+    return result;
+}
+
+Shaka.manifestSourceHandler.canUseHlsType = function(type, options = {}) {
+    const localOptions = videojs.mergeOptions(videojs.options, options);
+    const enableHls = localOptions.shaka.enableHls;
+    const pattern = /^(application\/x-mpegURL|application\/vnd.apple.mpegurl)/i;
+    const result = enableHls && pattern.test(type);
+    shaka.log.debug('Shaka.manifestSourceHandler.canUseHlsType | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
+    return result;
+}
+
 Shaka.manifestSourceHandler.canPlayType = function(type, options = {}) {
     const localOptions = videojs.mergeOptions(videojs.options, options);
     const overrideNative = localOptions.shaka.overrideNative;
-    const pattern = /^(application\/dash\+xml|application\/x-mpegURL|application\/vnd.apple.mpegurl)/i;
-    const canUse = pattern.test(type) && Shaka.isSupported() && (!Shaka.supportsTypeNatively(type) || overrideNative);
+    const canUseDash = Shaka.manifestSourceHandler.canUseDashType(type, localOptions);
+    const canUseHls = Shaka.manifestSourceHandler.canUseHlsType(type, localOptions);
+    const canUse = (canUseDash || canUseHls) && Shaka.isSupported() && (!Shaka.supportsTypeNatively(type) || overrideNative);
     const result = canUse ? 'maybe' : '';
     shaka.log.debug('Shaka.manifestSourceHandler.canPlayType | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
     return result;
