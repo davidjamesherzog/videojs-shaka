@@ -251,4 +251,10 @@ Shaka.manifestSourceHandler.handleSource = function(source, tech, options) {
   tech.setSrc(source.src);
 };
 
+// Reset source handlers
+Shaka.sourceHandlers = [];
+
+// Register manifest source handler
+Shaka.registerSourceHandler(Shaka.manifestSourceHandler, 0);
+
 export default Shaka;
