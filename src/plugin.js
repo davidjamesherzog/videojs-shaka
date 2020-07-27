@@ -14,6 +14,7 @@ const defaults = {
     drm: {},
     enableDash: true,
     enableHls: true,
+    enableOther: true,
     overrideNative: !videojs.browser.IS_ANY_SAFARI
 }
 videojs.options.shaka = videojs.mergeOptions(defaults, videojs.options.shaka || {});

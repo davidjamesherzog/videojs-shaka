@@ -195,7 +195,7 @@ Shaka.supportsTypeNatively = function(type) {
  * @return {string} 'probably', 'maybe', or '' (empty string)
  */
 Shaka.canPlayType = function(type) {
-  const result = Shaka.manifestSourceHandler.canPlayType(type);
+  const result = Shaka.manifestSourceHandler.canPlayType(type) || Shaka.otherSourceHandler.canPlayType(type);
   shaka.log.debug('Shaka.canPlayType | ' + type + ' | ' + result);
   return result
 };
@@ -211,13 +211,15 @@ Shaka.canPlayType = function(type) {
  */
 Shaka.canPlaySource = function(source, options = {}) {
   const localOptions = {shaka: options};
-  const result = Shaka.manifestSourceHandler.canHandleSource(source, localOptions, 'probably');
+  const result = Shaka.manifestSourceHandler.canHandleSource(source, localOptions, 'probably') || Shaka.otherSourceHandler.canHandleSource(source, localOptions, 'probably');
   shaka.log.debug('Shaka.canPlaySource | ' + result + ' | ' + JSON.stringify(source, null, 2) + ' | ' + JSON.stringify(options, null, 2) + ' | ' + JSON.stringify(localOptions, null, 2));
   return result;
 };
 
 
-Shaka.manifestSourceHandler = {};
+Shaka.manifestSourceHandler = {
+    name: 'videojs-shaka-manifest-source-handler'
+};
 
 Shaka.manifestSourceHandler.canHandleSource = function(source, options = {}, yes = 'maybe') {
     const localOptions = videojs.mergeOptions(videojs.options, options);
@@ -298,10 +300,67 @@ Shaka.manifestSourceHandler.handleSource = function(source, tech, options) {
   tech.setSrc(source.src);
 };
 
+Shaka.otherSourceHandler = {
+    name: 'videojs-shaka-other-source-handler'
+};
+
+Shaka.otherSourceHandler.canHandleSource = function(source, options = {}, yes = 'maybe') {
+    const localOptions = videojs.mergeOptions(videojs.options, options);
+    var type = '';
+    if (!source.src) {
+        throw 'Invalid source "' + source.src + '" encountered.  The src attribute is required!'
+    } else if (/^blob\:/i.test(source.src)) {
+        throw 'Invalid source "' + source.src + '" encountered.  We cannot handle blob urls!'
+    } else if (source.type) {
+        type = source.type;
+    } else {
+        const extension = shaka.media.ManifestParser.getExtension(uri);
+        const typeGuess = {
+            'mp4': 'video/mp4',
+            'm4v': 'video/mp4',
+            'm4a': 'audio/mp4',
+            'webm': 'video/webm',
+            'weba': 'audio/webm',
+            'mkv': 'video/webm', // Chromium browsers supports it.
+            'ts': 'video/mp2t',
+            'ogv': 'video/ogg',
+            'ogg': 'audio/ogg',
+            'mpg': 'video/mpeg',
+            'mpeg': 'video/mpeg',
+            'm3u8': 'application/x-mpegurl',
+            'mp3': 'audio/mpeg',
+            'aac': 'audio/aac',
+            'flac': 'audio/flac',
+            'wav': 'audio/wav',
+          }[extension];
+        type = typeGuess || type;
+    }
+    const result = Shaka.otherSourceHandler.canPlayType(type, localOptions, yes);
+    shaka.log.debug('Shaka.otherSourceHandler.canHandleSource | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
+    return result;
+};
+
+Shaka.otherSourceHandler.canPlayType = function(type, options = {}, yes = 'maybe') {
+    const localOptions = videojs.mergeOptions(videojs.options, options);
+    const enableOther = localOptions.shaka.enableOther;
+    const isDash = Shaka.manifestSourceHandler.isDashType(type);
+    const isHls = Shaka.manifestSourceHandler.isHlsType(type);
+    const canUse = enableOther && !isDash && !isHls && Shaka.supportsTypeNatively(type);
+    const result = canUse ? yes : '';
+    shaka.log.debug('Shaka.otherSourceHandler.canPlayType | "' + result + '" | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
+    return result;
+};
+
+Shaka.otherSourceHandler.handleSource = function(source, tech, options) {
+  shaka.log.debug('Shaka.otherSourceHandler.handleSource: ' + source.src);
+  tech.setSrc(source.src);
+};
+
 // Reset source handlers
 Shaka.sourceHandlers = [];
 
-// Register manifest source handler
+// Register source handlers
+Shaka.registerSourceHandler(Shaka.otherSourceHandler, 0);
 Shaka.registerSourceHandler(Shaka.manifestSourceHandler, 0);
 
 export default Shaka;
