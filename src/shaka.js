@@ -240,19 +240,20 @@ Shaka.manifestSourceHandler.canHandleSource = function(source, options = {}, yes
     return result;
 };
 
+Shaka.manifestSourceHandler.isDashType = function(type) {
+    const pattern = /^application\/dash\+xml/i;
+    return pattern.test(type);
+};
+
 Shaka.manifestSourceHandler.canUseDashType = function(type, options = {}) {
     const localOptions = videojs.mergeOptions(videojs.options, options);
     const enableDash = (localOptions.shaka.enableDash == null) ? !videojs.browser.IS_ANY_SAFARI : localOptions.shaka.enableDash;
-    const pattern = /^application\/dash\+xml/i;
-    const result = enableDash && pattern.test(type);
+    const result = enableDash && Shaka.manifestSourceHandler.isDashType(type);
     shaka.log.debug('Shaka.manifestSourceHandler.canUseDashType | ' + enableDash + ' | ' + result + ' | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
     return result;
-}
+};
 
-Shaka.manifestSourceHandler.canUseHlsType = function(type, options = {}) {
-    const localOptions = videojs.mergeOptions(videojs.options, options);
-    const enableHls = localOptions.shaka.enableHls;
-    
+Shaka.manifestSourceHandler.isHlsType = function(type) {
     // HLS manifests can go by many mime-types
     const choices = [
         // Apple santioned
@@ -268,14 +269,18 @@ Shaka.manifestSourceHandler.canUseHlsType = function(type, options = {}) {
         'video/mpegurl',
         'application/mpegurl'
     ];
-    const canPlayType = choices.some(function(choice) {
+    return choices.some(function(choice) {
         return choice == type;
     });
+};
 
-    const result = enableHls && canPlayType;
+Shaka.manifestSourceHandler.canUseHlsType = function(type, options = {}) {
+    const localOptions = videojs.mergeOptions(videojs.options, options);
+    const enableHls = localOptions.shaka.enableHls;
+    const result = enableHls && Shaka.manifestSourceHandler.isHlsType(type);
     shaka.log.debug('Shaka.manifestSourceHandler.canUseHlsType | ' + enableHls + ' | ' + result + ' | ' + type + ' | ' + JSON.stringify(localOptions, null, 2));
     return result;
-}
+};
 
 Shaka.manifestSourceHandler.canPlayType = function(type, options = {}, yes = 'maybe') {
     const localOptions = videojs.mergeOptions(videojs.options, options);
