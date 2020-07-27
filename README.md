@@ -161,6 +161,8 @@ If you need to set the DRM server after you initialize video.js prior to loading
 
 `enableHls`: false, true (default)
 
+`enableOther`: false, true (default) - playback of other natively supported content (i.e. mp4/webm via progressive download)
+
 `overrideNative`: false, true - defaults to `!videojs.browser.IS_ANY_SAFARI` per videojs (https://github.com/videojs/http-streaming/issues/912)
 
 `autoInitQualityPicker`: true, false (default) - when true the quality picker is automatically initialized

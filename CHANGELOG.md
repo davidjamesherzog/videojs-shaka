@@ -8,6 +8,7 @@
 * Added additional HLS mimetypes likely to be encountered per video.js
 * Added demos of new features
 * Added option to automatically initialize the quality picker
+* Added playback for natively supported content via progressive download (mp4, webm, etc)
 
 ## 0.4.5 (2020-07-17)
 * Show label for text track if available (#26)
