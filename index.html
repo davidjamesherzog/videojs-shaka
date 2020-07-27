@@ -170,6 +170,57 @@
             type="application/dash+xml"
         />
     </video>
+    
+    <p>Progressive download via auto setup</p>
+    <video class="video-js vjs-default-skin" controls  width="800" height="450"
+      data-setup='
+          {
+            "techOrder": [
+              "shaka"
+            ],
+            "shaka": {
+              "debug": true
+            }
+          }
+      '
+    >
+        <source
+            src="https://interactive-examples.mdn.mozilla.net/media/examples/flower.webm"
+            type="video/webm"
+        />
+        <source
+            src="https://interactive-examples.mdn.mozilla.net/media/examples/flower.mp4"
+            type="video/mp4"
+        />
+    </video>
+    
+    <p>Progressive download (enableOther: false) + HLS via auto setup</p>
+    <video class="video-js vjs-default-skin" controls  width="800" height="450"
+      data-setup='
+          {
+            "techOrder": [
+              "shaka"
+            ],
+            "shaka": {
+              "debug": true,
+              "enableOther": false
+            }
+          }
+      '
+    >
+        <source
+            src="https://interactive-examples.mdn.mozilla.net/media/examples/flower.webm"
+            type="video/webm"
+        />
+        <source
+            src="https://interactive-examples.mdn.mozilla.net/media/examples/flower.mp4"
+            type="video/mp4"
+        />
+        <source
+            src="https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8"
+            type="application/vnd.apple.mpegurl"
+        />
+    </video>
   
   <script src="node_modules/mux.js/dist/mux.js"></script>
   <script src="node_modules/shaka-player/dist/shaka-player.compiled.debug.js"></script>
