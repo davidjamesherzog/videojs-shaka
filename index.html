@@ -11,40 +11,13 @@
   </video>
   <br/>
   <div>
-    <input id="stream" type="text" value="https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd" style="width: 750px;"></input>
+    <input id="stream" type="text" value="https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd" style="width: 750px;" />
     <button id="play">Play</button>
   </div>
   <script src="node_modules/mux.js/dist/mux.js"></script>
   <script src="node_modules/shaka-player/dist/shaka-player.compiled.debug.js"></script>
   <script src="node_modules/video.js/dist/video.js"></script>
   <script src="dist/videojs-shaka.js"></script>
-  <script>
-    var player = videojs('videojs-shaka-player', {
-      autoplay: true,
-      techOrder: ['shaka'],
-      width: 800,
-      height: 450,
-      shaka: {
-        debug: true
-      }
-    });
-    player.qualityPickerPlugin();
-    player.src([{
-      type: 'application/dash+xml',
-      src: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd'
-    }]);
-
-    var stream = document.getElementById('stream');
-    var play = document.getElementById('play');
-
-    play.addEventListener('click', function() {
-      player.reset();
-      player.qualityPickerPlugin();
-      player.src([{
-        type: stream.value.endsWith('m3u8') ? 'application/x-mpegURL' : 'application/dash+xml',
-        src: stream.value
-      }]);
-    });
-  </script>
+  <script src="index.js"></script>
 </body>
 </html>
