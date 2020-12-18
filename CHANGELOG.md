@@ -1,3 +1,8 @@
+## 1.0.0 (2020-12-18)
+* Add ability to pass configuration to shaka player (#35)
+* Bump ini from 1.3.5 to 1.3.7 (#37)
+* Bump http-proxy from 1.17.0 to 1.18.1 (#33)
+
 ## 0.4.5 (2020-07-17)
 * Show label for text track if available (#26)
 * Bump lodash from 4.17.15 to 4.17.19 (#24)
