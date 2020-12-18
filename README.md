@@ -78,6 +78,9 @@ Configure DEBUG logging level in the following manner by including the `shaka-pl
     techOrder: ['shaka'],
     shaka: {
       debug: true
+      configuration: {
+        // shaka player configuration - https://shaka-player-demo.appspot.com/docs/api/tutorial-config.html
+      }   
     }
     ...
   });
@@ -99,11 +102,13 @@ Configure DRM in the following manner:
   var player = videojs('my-video', {
     techOrder: ['shaka'],
     shaka: {
-      drm: {
-        servers: {
-          'com.widevine.alpha': 'https://foo.bar/drm/widevine'
-        }
-      },
+      configuration: {
+        drm: {
+          servers: {
+            'com.widevine.alpha': 'https://foo.bar/drm/widevine'
+          }
+        },    
+      }
       licenseServerAuth: function(type, request) {
         // Only add headers to license requests:
         if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
@@ -135,11 +140,13 @@ If you need to set the DRM server after you initialize video.js prior to loading
   var player = videojs('my-video', {
     techOrder: ['shaka'],
     shaka: {
-      drm: function() {
-        // return the object here like
-        return {
-          servers: {
-            'com.widevine.alpha': 'https://foo.bar/drm/widevine'
+      configuration: {
+        drm: function() {
+          // return the object here like
+          return {
+            servers: {
+              'com.widevine.alpha': 'https://foo.bar/drm/widevine'
+            }
           }
         }
       }

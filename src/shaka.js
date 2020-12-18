@@ -73,19 +73,20 @@ class Shaka extends Html5 {
   setSrc(src) {
 
     const me = this;
+    const shakaOptions = this.options_.configuration || {};
 
-    let drm;
-    if (typeof this.options_.drm === 'function') {
-      drm = this.options_.drm();
+    if (typeof shakaOptions.drm === 'function') {
+      shakaOptions.drm = shakaOptions.drm();
     } else {
-      drm = this.options_.drm || {};
+      shakaOptions.drm = shakaOptions.drm || {};
     }
-    this.shaka_.configure({
-      abr: {
+    if (!shakaOptions.abr) {
+      shakaOptions.abr = {
         enabled: true
-      },
-      drm: drm
-    });
+      };
+    }
+    this.shaka_.configure(shakaOptions);
+
     if (this.options_.licenseServerAuth) {
       this.shaka_.getNetworkingEngine().registerRequestFilter(this.options_.licenseServerAuth);
     }
