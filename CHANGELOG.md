@@ -1,3 +1,7 @@
+## 1.1.0 (2021-01-06)
+* Add sideload subtitles config option (#38)
+* Update .nvmrc to use Node v14
+
 ## 1.0.0 (2020-12-18)
 * Add ability to pass configuration to shaka player (#35)
 * Bump ini from 1.3.5 to 1.3.7 (#37)
