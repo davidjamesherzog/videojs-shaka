@@ -115,8 +115,9 @@ export default function setupTextTracks(tech, shakaPlayer) {
     // Cleanup old tracks
     clearDashTracks();
 
-    if (!tracks.length) {
-      // Don't try to add text tracks if there aren't any
+    // Don't try to add text tracks if there aren't any or if the app is sideloading webvtt files
+    if (!tracks.length || tech.options_.sideload) {
+      shakaPlayer.setTextTrackVisibility(false);
       return;
     }
 

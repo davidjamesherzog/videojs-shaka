@@ -93,6 +93,35 @@ Configure DEBUG logging level in the following manner by including the `shaka-pl
 </script>
 ```
 
+### Sideloading Subtitles/Captions
+
+There may be times when you have embedded subtitles in your stream, but you want to side load webvtt files into video.js yourself.  Just specify `sideload: true` and the embedded subtitles in the stream will be ignored  (default will be set to false).
+
+```html
+<script src="//path/to/shaka-player.compiled.debug.js"></script>
+<script src="//path/to/video.min.js"></script>
+<script src="//path/to/videojs-shaka.min.js"></script>
+<script>
+  var player = videojs('my-video', {
+    techOrder: ['shaka'],
+    shaka: {
+      debug: false,
+      sideload: true,
+      configuration: {
+        // shaka player configuration - https://shaka-player-demo.appspot.com/docs/api/tutorial-config.html
+      }   
+    }
+    ...
+  });
+
+  player.qualityPickerPlugin();
+  player.src([{
+    type: 'application/dash+xml',
+    src: '//path/to/some.mpd'
+  }]);
+</script>
+```
+
 ### DRM
 
 Configure DRM in the following manner:
@@ -133,7 +162,7 @@ Configure DRM in the following manner:
 </script>
 ```
 
-If you need to set the DRM server after you initialize video.js prior to loading the source, you can specify a function for `shaka.drm` as follows:
+If you need to set the DRM server after you initialize video.js prior to loading the source, you can specify a function for `shaka.configuration.drm` as follows:
 
 ```html
 <script>
