@@ -5,6 +5,7 @@ var player = videojs('videojs-shaka-player', {
   height: 450,
   shaka: {
     debug: false,
+    sideload: false,
     configuration: {
       // just an example of setting shaka player config options
       streaming: {
