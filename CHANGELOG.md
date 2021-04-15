@@ -1,3 +1,7 @@
+## 1.1.1 (2021-04-15)
+* Bump y18n from 3.2.1 to 3.2.2 (#42)
+* Support waiting and playing for buffering event (#41)
+
 ## 1.1.0 (2021-01-06)
 * Add sideload subtitles config option (#38)
 * Update .nvmrc to use Node v14
