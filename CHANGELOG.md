@@ -1,3 +1,11 @@
+## 1.1.2 (2022-04-11)
+* Add test DASH/HLS urls and update jsdoc (#51)
+* Bump path-parse from 1.0.6 to 1.0.7 (#47)
+* Bump browserslist from 4.4.0 to 4.16.6 (#46)
+* Bump hosted-git-info from 2.7.1 to 2.8.9 (#45)
+* Bump lodash from 4.17.19 to 4.17.21 (#44)
+* Bump handlebars from 4.5.3 to 4.7.7 (#43)
+
 ## 1.1.1 (2021-04-15)
 * Bump y18n from 3.2.1 to 3.2.2 (#42)
 * Support waiting and playing for buffering event (#41)
