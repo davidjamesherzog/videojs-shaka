@@ -88,7 +88,7 @@
     "video.js": "^6 || ^7"
   },
   "devDependencies": {
-    "@videojs/generator-helpers": "~1.0.0",
+    "@videojs/generator-helpers": "~3.2.0",
     "http-server": "^0.12.0",
     "jsdoc": "3.6.10",
     "karma": "^3.0.0",
