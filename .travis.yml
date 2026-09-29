@@ -1,4 +1,4 @@
-dist: xenial
+dist: jammy
 language: node_js
 # node version is specified using the .nvmrc file
 cache: npm

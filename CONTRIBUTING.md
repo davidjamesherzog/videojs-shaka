@@ -4,7 +4,7 @@ We welcome contributions from everyone!
 
 ## Getting Started
 
-Make sure you have Node.js 8 or higher and npm installed.
+Make sure you have Node.js 24 or higher and npm 10 or higher installed (see `.nvmrc`).
 
 1. Fork this repository and clone your fork
 1. Install dependencies: `npm install`

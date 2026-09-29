@@ -13,7 +13,7 @@
     "ie 11"
   ],
   "scripts": {
-    "prepare": "npm run build",
+    "prepack": "npm run build",
     "prebuild": "npm run clean",
     "build": "npm-run-all -p build:*",
     "build:css": "postcss -o dist/videojs-shaka.css --config scripts/postcss.config.js src/plugin.css",
@@ -41,8 +41,8 @@
     "sample": "npm run build && ./node_modules/http-server/bin/http-server --p 3000"
   },
   "engines": {
-    "node": ">=8",
-    "npm": ">=5"
+    "node": ">=24",
+    "npm": ">=10"
   },
   "keywords": [
     "videojs",
