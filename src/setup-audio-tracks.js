@@ -1,49 +1,29 @@
 import videojs from 'video.js';
-
-/**
- * Build a human readable label for a shaka audio track.
- *
- * @param {shaka.extern.AudioTrack} track
- *        The shaka audio track.
- *
- * @return {string}
- *         A label such as `en` or `en (description)`.
- */
-function generateLabelFromTrack(track) {
-  if (track.label) {
-    return track.label;
-  }
-
-  let label = track.language;
-  const roles = (track.roles || []).filter((role) => role !== 'main');
-
-  if (roles.length) {
-    label += ` (${roles.join(', ')})`;
-  }
-
-  return label;
-}
+import {audioTrackLabel, uiLanguageOf} from './track-label';
 
 /**
  * Shaka Player reports one audio track per audio stream, so a language that is
  * offered in several codecs (e.g. AAC and Opus) or bitrates shows up more than
- * once. Collapse those down to one entry per language/roles/label, the way
- * shaka's old `getAudioLanguagesAndRoles()` did, preferring the active stream.
+ * once. Collapse those down to one entry per viewer facing choice (language,
+ * roles, channel layout and any meaningful label), the way shaka's old
+ * `getAudioLanguagesAndRoles()` did, preferring the active stream.
  *
  * @param {shaka.extern.AudioTrack[]} tracks
  *        The audio tracks reported by shaka player.
  *
+ * @param {string} [uiLanguage]
+ *        The player's UI language, used to build the labels.
+ *
  * @return {shaka.extern.AudioTrack[]}
- *         One track per distinct language/roles/label.
+ *         One track per distinct choice.
  */
-export function dedupeAudioTracks(tracks) {
+export function dedupeAudioTracks(tracks, uiLanguage) {
   const byKey = {};
   const result = [];
 
   tracks.forEach((track) => {
-    // `main` is the default role, so a stream with no role and a `main` stream are the same choice
-    const roles = (track.roles || []).filter((role) => role !== 'main').sort();
-    const key = [track.language, roles.join(','), track.label || ''].join('|');
+    // the label already folds in language, non-default roles and channel layout
+    const key = [track.language, audioTrackLabel(track, uiLanguage)].join('|');
     const existingIndex = byKey[key];
 
     if (existingIndex === undefined) {
@@ -75,6 +55,7 @@ export function dedupeAudioTracks(tracks) {
 function handleAudioTracksAdded(tech, shakaPlayer, tracks) {
 
   const videojsAudioTracks = tech.audioTracks();
+  const uiLanguage = uiLanguageOf(tech);
 
   // Safari creates a single native `AudioTrack` (not `videojs.AudioTrack`) when loading. Clear all
   // automatically generated audio tracks so we can create them all ourself.
@@ -104,7 +85,7 @@ function handleAudioTracksAdded(tech, shakaPlayer, tracks) {
       enabled,
       id,
       kind: 'main',
-      label: generateLabelFromTrack(shakaTrack),
+      label: audioTrackLabel(shakaTrack, uiLanguage),
       language: shakaTrack.language
     }));
   });
@@ -145,5 +126,5 @@ function handleAudioTracksAdded(tech, shakaPlayer, tracks) {
  *        The shaka player instance.
  */
 export default function setupAudioTracks(tech, shakaPlayer) {
-  handleAudioTracksAdded(tech, shakaPlayer, dedupeAudioTracks(shakaPlayer.getAudioTracks()));
+  handleAudioTracksAdded(tech, shakaPlayer, dedupeAudioTracks(shakaPlayer.getAudioTracks(), uiLanguageOf(tech)));
 }

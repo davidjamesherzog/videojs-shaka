@@ -1,3 +1,5 @@
+import {textTrackLabel, uiLanguageOf} from './track-label';
+
 /**
  * Select a shaka text track, or hide text entirely when `track` is falsy.
  *
@@ -44,6 +46,7 @@ function attachShakaTextTracksToVideojs(tech, shakaPlayer, tracks) {
 
   // also read by `VideojsTextDisplayer` to find the track that receives cues
   const trackDictionary = tech.shakaTextTracks_ = [];
+  const uiLanguage = uiLanguageOf(tech);
 
   // Add remote tracks
   const tracksAttached = tracks
@@ -52,7 +55,7 @@ function attachShakaTextTracksToVideojs(tech, shakaPlayer, tracks) {
     .map((track) => ({
       shakaTrack: track,
       trackConfig: {
-        label: track.label || track.language,
+        label: textTrackLabel(track, uiLanguage),
         language: track.language,
         srclang: track.language,
         kind: track.kind || 'subtitles'

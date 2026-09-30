@@ -8,6 +8,7 @@ import videojs from 'video.js';
 import plugin from '../src/plugin';
 import {dedupeAudioTracks} from '../src/setup-audio-tracks';
 import VideojsTextDisplayer, {cueToText} from '../src/videojs-text-displayer';
+import {isMeaningfulLabel, languageDisplayName, textTrackLabel, audioTrackLabel} from '../src/track-label';
 
 const Player = videojs.getComponent('Player');
 const DASH_SOURCE = {
@@ -137,17 +138,42 @@ QUnit.module('videojs-shaka track helpers');
 
 QUnit.test('dedupeAudioTracks collapses codec variants of the same language', function(assert) {
   const tracks = [
-    {language: 'es', roles: [], label: null, codecs: 'mp4a.40.2', active: false},
-    {language: 'en', roles: ['main'], label: null, codecs: 'mp4a.40.2', active: false},
-    {language: 'es', roles: [], label: null, codecs: 'opus', active: true},
-    {language: 'en', roles: ['main'], label: null, codecs: 'opus', active: false},
-    {language: 'en', roles: ['description'], label: null, codecs: 'opus', active: false}
+    {language: 'es', roles: [], label: null, codecs: 'mp4a.40.2', channelsCount: 2, active: false},
+    {language: 'en', roles: ['main'], label: null, codecs: 'mp4a.40.2', channelsCount: 2, active: false},
+    {language: 'es', roles: [], label: null, codecs: 'opus', channelsCount: 2, active: true},
+    {language: 'en', roles: ['main'], label: null, codecs: 'opus', channelsCount: 2, active: false},
+    {language: 'en', roles: ['description'], label: null, codecs: 'opus', channelsCount: 2, active: false},
+    {language: 'en', roles: [], label: 'stream_6', codecs: 'mp4a.40.2', channelsCount: 6, active: false},
+    {language: 'en', roles: [], label: 'stream_7', codecs: 'mp4a.40.2', channelsCount: 2, active: false}
   ];
-  const deduped = dedupeAudioTracks(tracks);
+  const deduped = dedupeAudioTracks(tracks, 'en');
 
-  assert.strictEqual(deduped.length, 3, 'one entry per language/roles');
+  assert.strictEqual(deduped.length, 4, 'one entry per language/roles/channel layout');
   assert.strictEqual(deduped[0].codecs, 'opus', 'the active stream wins for a language');
-  assert.deepEqual(deduped.map((t) => t.language + ':' + t.roles.join()), ['es:', 'en:main', 'en:description'], 'roles stay distinct');
+  assert.deepEqual(
+    deduped.map((t) => audioTrackLabel(t, 'en')),
+    ['Spanish', 'English', 'English (description)', 'English (5.1)'],
+    'roles and surround layouts stay distinct, generic labels are ignored'
+  );
+});
+
+QUnit.test('track labels are readable', function(assert) {
+  assert.notOk(isMeaningfulLabel('stream_0', 'en'), 'auto-generated packager names are not meaningful');
+  assert.notOk(isMeaningfulLabel('audio-2', 'en'), 'auto-generated packager names are not meaningful');
+  assert.notOk(isMeaningfulLabel('subtitles', 'en'), 'bare kind names are not meaningful');
+  assert.notOk(isMeaningfulLabel('EN', 'en'), 'a repeat of the language code is not meaningful');
+  assert.notOk(isMeaningfulLabel(null, 'en'), 'missing labels are not meaningful');
+  assert.ok(isMeaningfulLabel('Director commentary', 'en'), 'real names are meaningful');
+
+  assert.strictEqual(languageDisplayName('pt-BR', 'en'), 'Brazilian Portuguese', 'language codes are translated');
+  assert.strictEqual(languageDisplayName('zz-not-a-language', 'en'), 'zz-not-a-language', 'unknown codes fall back to the code');
+
+  assert.strictEqual(textTrackLabel({label: 'stream_1', language: 'el', forced: false}, 'en'), 'Greek', 'generic text labels are replaced');
+  assert.strictEqual(textTrackLabel({label: 'English CC', language: 'en', forced: false}, 'en'), 'English CC', 'meaningful text labels are kept');
+  assert.strictEqual(textTrackLabel({label: null, language: 'fr', forced: true}, 'en'), 'French (forced)', 'forced tracks are marked');
+  assert.strictEqual(audioTrackLabel({label: null, language: 'en', roles: ['main'], channelsCount: 2}, 'en'), 'English', 'main role and stereo add nothing');
+  assert.strictEqual(audioTrackLabel({label: 'stream_6', language: 'en', roles: [], channelsCount: 6}, 'en'), 'English (5.1)', 'surround layout is shown');
+  assert.strictEqual(audioTrackLabel({label: null, language: 'de', roles: ['commentary'], channelsCount: 8}, 'en'), 'German (commentary, 7.1)', 'roles and layout combine');
 });
 
 QUnit.test('cueToText flattens nested cues and line breaks', function(assert) {
