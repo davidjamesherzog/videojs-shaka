@@ -7,13 +7,15 @@ shaka player
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [Installation](#installation)
+- [Compatibility](#compatibility)
 - [Usage](#usage)
   - [`<script>` Tag](#script-tag)
   - [Debug](#debug)
+  - [Sideloading Subtitles/Captions](#sideloading-subtitlescaptions)
   - [DRM](#drm)
   - [`qualitytrackchange` Event](#qualitytrackchange-event)
+- [Sample App](#sample-app)
 - [Special Thanks](#special-thanks)
 - [License](#license)
 
@@ -21,8 +23,21 @@ shaka player
 ## Installation
 
 ```sh
-npm install --save videojs-shaka
+npm install --save videojs-shaka video.js shaka-player
 ```
+
+## Compatibility
+
+| videojs-shaka | video.js | shaka-player      | Node.js (build only) |
+| ------------- | -------- | ----------------- | -------------------- |
+| 2.x           | 8.x      | 4.14+ or 5.x      | 24+                  |
+| 1.x           | 6.x, 7.x | 2.4.x             | 8+                   |
+
+`shaka-player` is a peer dependency: this tech uses the `shaka` global, so include the
+`shaka-player.compiled.js` (or `.debug.js`) script on your page _before_ video.js and this
+plugin. Both DASH (`application/dash+xml`) and HLS (`application/x-mpegURL` /
+`application/vnd.apple.mpegurl`) sources are handed to shaka player, bypassing video.js's
+built-in VHS engine.
 
 ## Usage
 

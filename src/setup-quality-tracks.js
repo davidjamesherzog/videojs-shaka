@@ -1,26 +1,31 @@
-function _getQuality(tech, shakaPlayer) {
+/**
+ * Build the list of selectable video qualities from shaka's variant tracks.
+ *
+ * @param {shaka.Player} shakaPlayer
+ *        The shaka player instance.
+ *
+ * @return {Object[]}
+ *         Quality entries, including an `auto` entry with id `-1` when more
+ *         than one quality exists.
+ *
+ * @private
+ */
+function getQuality(shakaPlayer) {
 
   const tracks = [];
-  const levels = shakaPlayer.getVariantTracks().filter(function(t) {
-    return t.type === 'variant';
-  });
+  const levels = shakaPlayer.getVariantTracks().filter((t) => t.type === 'variant' && t.height);
 
   if (levels.length > 1) {
-
-    const autoLevel = {
+    tracks.push({
       id: -1,
       label: 'auto',
       selected: true
-    };
-
-    tracks.push(autoLevel);
+    });
   }
 
-  levels.forEach(function(level, index) {
-
-    const track = level;
-
+  levels.forEach((level) => {
     let label = '';
+
     if (level.height >= 2160) {
       label = ' (4k)';
     } else if (level.height >= 1440) {
@@ -28,13 +33,12 @@ function _getQuality(tech, shakaPlayer) {
     } else if (level.height >= 720) {
       label = ' (HD)';
     }
-    track.label = level.height + 'p' + label;
 
-    tracks.push(track);
+    tracks.push(Object.assign({}, level, {label: level.height + 'p' + label}));
   });
 
-  // group tracks by langugage b/c we will need to only display the tracks associated with the current audio track
-  const sortedTracks = tracks
+  // group tracks by language b/c we will need to only display the tracks associated with the current audio track
+  return tracks
     .sort((track1, track2) => {
       if (track1.language > track2.language) {
         return -1;
@@ -65,17 +69,25 @@ function _getQuality(tech, shakaPlayer) {
       }
       return accumulator;
     }, { previousHeight: null, previousLanguage: null, list: [] }).list;
-
-  return sortedTracks;
 }
 
+/**
+ * Publish the available video qualities to the quality picker and wire up
+ * quality switching.
+ *
+ * @param {Tech} tech
+ *        The video.js tech being used.
+ *
+ * @param {shaka.Player} shakaPlayer
+ *        The shaka player instance.
+ */
 export default function setupQualityTracks(tech, shakaPlayer) {
 
   tech.trigger('loadedqualitydata', {
     qualityData: {
-      video: _getQuality(tech, shakaPlayer)
+      video: getQuality(shakaPlayer)
     },
-    qualitySwitchCallback: function(id, type) {
+    qualitySwitchCallback(id, type) {
 
       // Update the adaptation.
       shakaPlayer.configure({
@@ -85,19 +97,17 @@ export default function setupQualityTracks(tech, shakaPlayer) {
       });
 
       // Is auto?
-      if (id === -1) return;
+      if (id === -1) {
+        return;
+      }
 
-      const tracks = shakaPlayer.getVariantTracks().filter(function(t) {
-        return t.id === id && t.type === 'variant';
-      });
+      const track = shakaPlayer.getVariantTracks().find((t) => t.id === id && t.type === 'variant');
 
-      shakaPlayer.selectVariantTrack(tracks[0], /* clearBuffer */ true);
+      // shaka fires `variantchanged` itself for manual selections
+      if (track) {
+        const clearBuffer = true;
 
-      // fire `variantchanged` event - only supports debug mode right now
-      // todo - need to figure out how to do this in non debug mode
-      if (shaka.util.FakeEvent) {
-        const event = new shaka.util.FakeEvent('variantchanged');
-        shakaPlayer.dispatchEvent(event);
+        shakaPlayer.selectVariantTrack(track, clearBuffer);
       }
     }
   });
