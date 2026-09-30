@@ -42,7 +42,8 @@ function selectShakaTextTrack(shakaPlayer, track) {
  */
 function attachShakaTextTracksToVideojs(tech, shakaPlayer, tracks) {
 
-  const trackDictionary = [];
+  // also read by `VideojsTextDisplayer` to find the track that receives cues
+  const trackDictionary = tech.shakaTextTracks_ = [];
 
   // Add remote tracks
   const tracksAttached = tracks
@@ -130,6 +131,7 @@ export default function setupTextTracks(tech, shakaPlayer) {
     shakaTracksAttachedToVideoJs.forEach(tech.removeRemoteTextTrack.bind(tech));
 
     shakaTracksAttachedToVideoJs = [];
+    tech.shakaTextTracks_ = [];
   }
 
   function handleTextTracksAdded(tracks) {

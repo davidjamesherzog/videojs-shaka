@@ -25,6 +25,39 @@ function generateLabelFromTrack(track) {
 }
 
 /**
+ * Shaka Player reports one audio track per audio stream, so a language that is
+ * offered in several codecs (e.g. AAC and Opus) or bitrates shows up more than
+ * once. Collapse those down to one entry per language/roles/label, the way
+ * shaka's old `getAudioLanguagesAndRoles()` did, preferring the active stream.
+ *
+ * @param {shaka.extern.AudioTrack[]} tracks
+ *        The audio tracks reported by shaka player.
+ *
+ * @return {shaka.extern.AudioTrack[]}
+ *         One track per distinct language/roles/label.
+ */
+export function dedupeAudioTracks(tracks) {
+  const byKey = {};
+  const result = [];
+
+  tracks.forEach((track) => {
+    // `main` is the default role, so a stream with no role and a `main` stream are the same choice
+    const roles = (track.roles || []).filter((role) => role !== 'main').sort();
+    const key = [track.language, roles.join(','), track.label || ''].join('|');
+    const existingIndex = byKey[key];
+
+    if (existingIndex === undefined) {
+      byKey[key] = result.length;
+      result.push(track);
+    } else if (track.active && !result[existingIndex].active) {
+      result[existingIndex] = track;
+    }
+  });
+
+  return result;
+}
+
+/**
  * Setup audio tracks. Take the audio tracks from shaka player and add them to
  * video.js. Listen for when video.js changes tracks and apply that to shaka
  * player because video.js doesn't do this natively.
@@ -112,5 +145,5 @@ function handleAudioTracksAdded(tech, shakaPlayer, tracks) {
  *        The shaka player instance.
  */
 export default function setupAudioTracks(tech, shakaPlayer) {
-  handleAudioTracksAdded(tech, shakaPlayer, shakaPlayer.getAudioTracks());
+  handleAudioTracksAdded(tech, shakaPlayer, dedupeAudioTracks(shakaPlayer.getAudioTracks()));
 }

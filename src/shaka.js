@@ -3,6 +3,7 @@ import window from 'global/window';
 import setupQualityTracks from './setup-quality-tracks';
 import setupTextTracks from './setup-text-tracks';
 import setupAudioTracks from './setup-audio-tracks';
+import VideojsTextDisplayer from './videojs-text-displayer';
 import {version as VERSION} from '../package.json';
 
 const Html5 = videojs.getTech('Html5');
@@ -52,6 +53,12 @@ class Shaka extends Html5 {
    * @private
    */
   getPlayer_() {
+    // `options_` is cleared once the tech is disposed, but shaka may still
+    // emit events while it finishes tearing down
+    if (!this.options_) {
+      return null;
+    }
+
     return videojs.getPlayer(this.options_.playerId);
   }
 
@@ -79,6 +86,18 @@ class Shaka extends Html5 {
     }
 
     this.shaka_ = new shaka.Player();
+
+    // Render captions through the video.js text tracks this tech creates
+    // rather than letting shaka add native text tracks to the video element.
+    // The factory has to be in place before `attach()` creates shaka's media
+    // source engine, and it has to keep the same identity across
+    // `configure()` calls, otherwise shaka rebuilds the displayer.
+    const configuration = this.options_.configuration || {};
+
+    this.textDisplayFactory_ = configuration.textDisplayFactory ||
+      ((shakaPlayer) => new VideojsTextDisplayer(this));
+    this.shaka_.configure({textDisplayFactory: this.textDisplayFactory_});
+
     this.shakaReady_ = this.shaka_.attach(this.el_);
 
     this.shaka_.addEventListener('buffering', (event) => {
@@ -137,17 +156,27 @@ class Shaka extends Html5 {
         enabled: true
       };
     }
-    this.shaka_.configure(shakaOptions);
-
-    if (this.options_.licenseServerAuth && !this.requestFilterRegistered_) {
-      this.shaka_.getNetworkingEngine().registerRequestFilter(this.options_.licenseServerAuth);
-      this.requestFilterRegistered_ = true;
-    }
+    shakaOptions.textDisplayFactory = this.textDisplayFactory_;
 
     const mimeType = typeof type === 'string' ? type.toLowerCase() : null;
 
+    // configure only once `attach()` has finished, so that configuration
+    // (in particular the text displayer) reaches shaka's media source engine
     this.shakaReady_
-      .then(() => this.shaka_.load(src, null, mimeType))
+      .then(() => {
+        if (!this.shaka_) {
+          return;
+        }
+
+        this.shaka_.configure(shakaOptions);
+
+        if (this.options_.licenseServerAuth && !this.requestFilterRegistered_) {
+          this.shaka_.getNetworkingEngine().registerRequestFilter(this.options_.licenseServerAuth);
+          this.requestFilterRegistered_ = true;
+        }
+
+        return this.shaka_.load(src, null, mimeType);
+      })
       .then(() => this.initShakaMenus())
       .catch((error) => this.retriggerError(error));
   }

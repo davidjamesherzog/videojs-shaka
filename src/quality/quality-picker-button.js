@@ -21,7 +21,6 @@ class QualityPickerButton extends VjsButton {
     let menuItem;
     let options;
 
-    debugger;
     for (let i = 0; i < this.options_.qualityList.length; i++) {
       const quality = this.options_.qualityList[i];
       const {qualitySwitchCallback, trackType} = this.options_;
