@@ -9,6 +9,7 @@ import plugin from '../src/plugin';
 import {dedupeAudioTracks} from '../src/setup-audio-tracks';
 import VideojsTextDisplayer, {cueToText} from '../src/videojs-text-displayer';
 import {isMeaningfulLabel, languageDisplayName, textTrackLabel, audioTrackLabel} from '../src/track-label';
+import {buildQualityList, pickVariantForHeight, pickVariantForBandwidth} from '../src/setup-quality-tracks';
 
 const Player = videojs.getComponent('Player');
 const DASH_SOURCE = {
@@ -240,4 +241,64 @@ QUnit.test('feeds cues to the mirrored video.js track', function(assert) {
   return displayer.destroy().then(() => {
     assert.strictEqual(textTrack.cues.length, 0, 'destroy clears the cues');
   });
+});
+
+QUnit.test('quality list has one entry per height across audio tracks', function(assert) {
+  const variant = (id, height, bandwidth, language, audioId, extra) =>
+    Object.assign({id, type: 'variant', height, bandwidth, language, audioId, videoCodec: 'avc1', audioCodec: 'mp4a', channelsCount: 2, audioRoles: [], active: false}, extra);
+  const variants = [
+    variant(1, 576, 2000, 'en', 10),
+    variant(2, 360, 800, 'en', 10),
+    variant(3, 576, 2100, 'de', 11),
+    variant(4, 360, 900, 'de', 11),
+    variant(5, 576, 2500, 'en', 12, {channelsCount: 6}),
+    variant(6, 360, 1300, 'en', 12, {channelsCount: 6}),
+    variant(7, 360, 1000, 'en', 10, {videoCodec: 'hvc1'}),
+    {id: 99, type: 'variant', height: null, bandwidth: 100, language: 'en'}
+  ];
+  const list = buildQualityList(variants);
+
+  assert.deepEqual(list.map((q) => q.label), ['auto', '576p', '360p'], 'auto plus one entry per height, highest first');
+  assert.deepEqual(list.map((q) => q.id), [-1, 576, 360], 'entries are keyed by height');
+
+  variants[3].active = true;
+  assert.strictEqual(pickVariantForHeight(variants, 576).id, 3, 'switching quality keeps the German audio track');
+
+  variants[3].active = false;
+  variants[1].active = true;
+  assert.strictEqual(pickVariantForHeight(variants, 360).id, 2, 'the current video codec is preferred over a higher bitrate');
+  assert.strictEqual(pickVariantForHeight(variants, 576).id, 1, 'stereo English stays stereo English');
+
+  variants[1].active = false;
+  variants[5].active = true;
+  assert.strictEqual(pickVariantForHeight(variants, 576).id, 5, '5.1 English stays 5.1 English');
+
+  variants.forEach((v) => {
+    v.active = false;
+    delete v.audioId;
+  });
+  variants[2].active = true;
+  assert.strictEqual(pickVariantForHeight(variants, 360).id, 4, 'language, roles and channels are used when shaka reports no audio id');
+  assert.strictEqual(pickVariantForHeight(variants, 1080), undefined, 'unknown heights select nothing');
+  assert.strictEqual(buildQualityList([variants[0]]).length, 1, 'no auto entry when there is a single quality');
+});
+
+QUnit.test('going back to auto picks the quality the bandwidth allows', function(assert) {
+  const variant = (id, height, bandwidth, audioId, extra) =>
+    Object.assign({id, type: 'variant', height, width: height * 16 / 9, bandwidth, language: 'en', audioId, channelsCount: 2, audioRoles: [], active: false}, extra);
+  const variants = [
+    variant(1, 1080, 5000000, 10),
+    variant(2, 720, 3000000, 10),
+    variant(3, 360, 1000000, 10),
+    variant(4, 144, 300000, 10, {active: true}),
+    variant(5, 1080, 4800000, 11, {language: 'de'})
+  ];
+
+  assert.strictEqual(pickVariantForBandwidth(variants, 4000000).id, 2, 'highest bitrate under 85% of the estimate');
+  assert.strictEqual(pickVariantForBandwidth(variants, 4000000, {bandwidthUpgradeTarget: 1}).id, 2, 'upgrade target from the shaka config is honoured');
+  assert.strictEqual(pickVariantForBandwidth(variants, 6000000, {bandwidthUpgradeTarget: 1}).id, 1, 'estimate above everything picks the top quality of the same audio');
+  assert.strictEqual(pickVariantForBandwidth(variants, 100000).id, 4, 'nothing fits: lowest bitrate');
+  assert.strictEqual(pickVariantForBandwidth(variants, 6000000, {restrictions: {maxHeight: 720}}).id, 2, 'ABR restrictions are respected');
+  assert.strictEqual(pickVariantForBandwidth(variants, 0), undefined, 'no estimate yet: leave it to ABR');
+  assert.strictEqual(pickVariantForBandwidth(variants, NaN), undefined, 'invalid estimate: leave it to ABR');
 });
