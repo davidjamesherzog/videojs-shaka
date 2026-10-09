@@ -16,15 +16,18 @@ export default function qualityPickerPlugin() {
 
   function onQualityData(event, {qualityData, qualitySwitchCallback}) {
     const fullscreenToggle = player.controlBar.getChild('fullscreenToggle');
+
     player.controlBar.removeChild(fullscreenToggle);
 
     for (let i = 0; i < SUPPORTED_TRACKS.length; i++) {
       const track = SUPPORTED_TRACKS[i];
       let name = track + 'PickerButton';
       // videojs.utils.toTitleCase
+
       name = name.charAt(0).toUpperCase() + name.slice(1);
 
       let qualityPickerButton = player.controlBar.getChild(name);
+
       if (qualityPickerButton) {
         qualityPickerButton.dispose();
         player.controlBar.removeChild(qualityPickerButton);

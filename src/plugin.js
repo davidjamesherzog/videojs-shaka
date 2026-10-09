@@ -9,6 +9,7 @@ Tech.registerTech('Shaka', Shaka);
 
 // Register quality picker plugin
 const registerPlugin = videojs.registerPlugin || videojs.plugin;
+
 registerPlugin('qualityPickerPlugin', qualityPickerPlugin);
 
 export default Shaka;

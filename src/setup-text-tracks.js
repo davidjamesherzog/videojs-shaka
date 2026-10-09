@@ -1,58 +1,88 @@
-function find(l, f) {
-  for (let i = 0; i < l.length; i++) {
-    if (f(l[i])) {
-      return l[i];
-    }
+import {textTrackLabel, uiLanguageOf} from './track-label';
+
+/**
+ * Select a shaka text track, or hide text entirely when `track` is falsy.
+ *
+ * Shaka Player 5 removed `setTextTrackVisibility()`; selecting a track shows
+ * it and passing `null` hides text. Shaka Player 4 still needs the explicit
+ * visibility call, so support both.
+ *
+ * @param {shaka.Player} shakaPlayer
+ *        The shaka player instance.
+ *
+ * @param {shaka.extern.TextTrack|null} track
+ *        The shaka text track to show, or `null` to hide text.
+ */
+function selectShakaTextTrack(shakaPlayer, track) {
+  if (track) {
+    shakaPlayer.selectTextTrack(track);
+  }
+
+  if (typeof shakaPlayer.setTextTrackVisibility === 'function') {
+    shakaPlayer.setTextTrackVisibility(!!track);
+  } else if (!track) {
+    shakaPlayer.selectTextTrack(null);
   }
 }
 
-/*
- * Attach text tracks from dash.js to videojs
+/**
+ * Attach text tracks from shaka player to video.js
  *
- * @param {videojs} tech the videojs player tech instance
- * @param {array} tracks the tracks loaded by dash.js to attach to videojs
+ * @param {Tech} tech
+ *        The video.js tech being used.
+ *
+ * @param {shaka.Player} shakaPlayer
+ *        The shaka player instance.
+ *
+ * @param {shaka.extern.TextTrack[]} tracks
+ *        The text tracks loaded by shaka player to attach to video.js
+ *
+ * @return {Object[]}
+ *         The remote text tracks that were added to video.js.
  *
  * @private
  */
-function attachDashTextTracksToVideojs(tech, shakaPlayer, tracks) {
+function attachShakaTextTracksToVideojs(tech, shakaPlayer, tracks) {
 
-  const trackDictionary = [];
+  // also read by `VideojsTextDisplayer` to find the track that receives cues
+  const trackDictionary = tech.shakaTextTracks_ = [];
+  const uiLanguage = uiLanguageOf(tech);
 
   // Add remote tracks
   const tracksAttached = tracks
     // Map input data to match HTMLTrackElement spec
     // https://developer.mozilla.org/en-US/docs/Web/API/HTMLTrackElement
     .map((track) => ({
-      dashTrack: track,
+      shakaTrack: track,
       trackConfig: {
-        label: track.label || track.language,
+        label: textTrackLabel(track, uiLanguage),
         language: track.language,
         srclang: track.language,
-        kind: track.kind
+        kind: track.kind || 'subtitles'
       }
     }))
 
     // Add track to videojs track list
-    .map(({trackConfig, dashTrack}) => {
+    .map(({trackConfig, shakaTrack}) => {
       const remoteTextTrack = tech.addRemoteTextTrack(trackConfig, false);
 
-      trackDictionary.push({textTrack: remoteTextTrack.track, dashTrack});
+      trackDictionary.push({textTrack: remoteTextTrack.track, shakaTrack});
 
-      // Don't add the cues becuase we're going to let dash handle it natively. This will ensure
-      // that dash handle external time text files and fragmented text tracks.
+      // Don't add the cues because we're going to let shaka handle it natively. This will ensure
+      // that shaka handles external timed text files and fragmented text tracks.
       //
-      // Example file with external time text files:
+      // Example file with external timed text files:
       // https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-wvtt/dash.mpd
 
       return remoteTextTrack;
     });
 
   /*
-   * Scan `videojs.textTracks()` to find one that is showing. Set the dash text track.
+   * Scan `videojs.textTracks()` to find one that is showing. Set the shaka text track.
    */
-  function updateActiveDashTextTrack() {
+  function updateActiveShakaTextTrack() {
 
-    let dashTrackToActivate;
+    let shakaTrackToActivate = null;
     const textTracks = tech.textTracks();
 
     // Iterate through the tracks and find the one marked as showing. If none are showing,
@@ -61,68 +91,65 @@ function attachDashTextTracksToVideojs(tech, shakaPlayer, tracks) {
       const textTrack = textTracks[i];
 
       if (textTrack.mode === 'showing') {
-        // Find the dash track we want to use
+        // Find the shaka track we want to use
+        const dictionaryLookupResult = trackDictionary.find((track) => track.textTrack === textTrack);
 
-        /* jshint loopfunc: true */
-        const dictionaryLookupResult = find(trackDictionary,
-          (track) => track.textTrack === textTrack);
-        /* jshint loopfunc: false */
-
-        dashTrackToActivate = dictionaryLookupResult ?
-          dictionaryLookupResult.dashTrack :
-          null;
+        shakaTrackToActivate = dictionaryLookupResult ? dictionaryLookupResult.shakaTrack : null;
       }
     }
 
-    // If the text track has changed, then set it in shaka
-    if (dashTrackToActivate) {
-      shakaPlayer.selectTextTrack(dashTrackToActivate);
-      shakaPlayer.setTextTrackVisibility(true);
-    } else {
-      shakaPlayer.setTextTrackVisibility(false);
-    }
-
+    selectShakaTextTrack(shakaPlayer, shakaTrackToActivate);
   }
 
-  // Update dash when videojs's selected text track changes.
-  tech.textTracks().on('change', updateActiveDashTextTrack);
+  // Update shaka when videojs's selected text track changes.
+  tech.textTracks().on('change', updateActiveShakaTextTrack);
 
   // Cleanup event listeners whenever we start loading a new source
   shakaPlayer.addEventListener('unloading', () => {
-    tech.textTracks().off('change', updateActiveDashTextTrack);
+    tech.textTracks().off('change', updateActiveShakaTextTrack);
   });
 
   // Initialize the text track on our first run-through
-  updateActiveDashTextTrack();
+  updateActiveShakaTextTrack();
 
   return tracksAttached;
 }
 
+/**
+ * Mirror shaka player's text tracks into the video.js text track list.
+ *
+ * @param {Tech} tech
+ *        The video.js tech being used.
+ *
+ * @param {shaka.Player} shakaPlayer
+ *        The shaka player instance.
+ */
 export default function setupTextTracks(tech, shakaPlayer) {
 
   // Store the tracks that we've added so we can remove them later.
-  let dashTracksAttachedToVideoJs = [];
+  let shakaTracksAttachedToVideoJs = [];
 
   // Clear the tracks that we added. We don't clear them all because someone else can add tracks.
-  function clearDashTracks() {
-    dashTracksAttachedToVideoJs.forEach(tech.removeRemoteTextTrack.bind(tech));
+  function clearShakaTracks() {
+    shakaTracksAttachedToVideoJs.forEach(tech.removeRemoteTextTrack.bind(tech));
 
-    dashTracksAttachedToVideoJs = [];
+    shakaTracksAttachedToVideoJs = [];
+    tech.shakaTextTracks_ = [];
   }
 
   function handleTextTracksAdded(tracks) {
 
     // Cleanup old tracks
-    clearDashTracks();
+    clearShakaTracks();
 
     // Don't try to add text tracks if there aren't any or if the app is sideloading webvtt files
     if (!tracks.length || tech.options_.sideload) {
-      shakaPlayer.setTextTrackVisibility(false);
+      selectShakaTextTrack(shakaPlayer, null);
       return;
     }
 
     // Save the tracks so we can remove them later
-    dashTracksAttachedToVideoJs = attachDashTextTracksToVideojs(tech, shakaPlayer, tracks);
+    shakaTracksAttachedToVideoJs = attachShakaTextTracksToVideojs(tech, shakaPlayer, tracks);
   }
 
   handleTextTracksAdded(shakaPlayer.getTextTracks());

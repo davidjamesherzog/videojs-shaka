@@ -1,37 +1,61 @@
 import videojs from 'video.js';
+import {audioTrackLabel, uiLanguageOf} from './track-label';
 
 /**
- * Setup audio tracks. Take the tracks from dash and add the tracks to videojs. Listen for when
- * videojs changes tracks and apply that to the dash player because videojs doesn't do this
- * natively.
+ * Shaka Player reports one audio track per audio stream, so a language that is
+ * offered in several codecs (e.g. AAC and Opus) or bitrates shows up more than
+ * once. Collapse those down to one entry per viewer facing choice (language,
+ * roles, channel layout and any meaningful label), the way shaka's old
+ * `getAudioLanguagesAndRoles()` did, preferring the active stream.
+ *
+ * @param {shaka.extern.AudioTrack[]} tracks
+ *        The audio tracks reported by shaka player.
+ *
+ * @param {string} [uiLanguage]
+ *        The player's UI language, used to build the labels.
+ *
+ * @return {shaka.extern.AudioTrack[]}
+ *         One track per distinct choice.
+ */
+export function dedupeAudioTracks(tracks, uiLanguage) {
+  const byKey = {};
+  const result = [];
+
+  tracks.forEach((track) => {
+    // the label already folds in language, non-default roles and channel layout
+    const key = [track.language, audioTrackLabel(track, uiLanguage)].join('|');
+    const existingIndex = byKey[key];
+
+    if (existingIndex === undefined) {
+      byKey[key] = result.length;
+      result.push(track);
+    } else if (track.active && !result[existingIndex].active) {
+      result[existingIndex] = track;
+    }
+  });
+
+  return result;
+}
+
+/**
+ * Setup audio tracks. Take the audio tracks from shaka player and add them to
+ * video.js. Listen for when video.js changes tracks and apply that to shaka
+ * player because video.js doesn't do this natively.
  *
  * @private
- * @param {videojs} tech the videojs player tech instance
- * @param {videojs.tech} tech the videojs tech being used
+ * @param {Tech} tech
+ *        The video.js tech being used.
+ *
+ * @param {shaka.Player} shakaPlayer
+ *        The shaka player instance.
+ *
+ * @param {shaka.extern.AudioTrack[]} tracks
+ *        The audio tracks reported by shaka player.
  */
 function handleAudioTracksAdded(tech, shakaPlayer, tracks) {
 
   const videojsAudioTracks = tech.audioTracks();
-
-  function generateIdFromTrackIndex(index) {
-    return `dash-audio-${index}`;
-  }
-
-  function generateLabelFromTrack(track) {
-    let label = track.language;
-
-    if (track.role) {
-      label += ` (${track.role})`;
-    }
-
-    return label;
-  }
-
-  function findDashAudioTrack(subDashAudioTracks, videojsAudioTrack) {
-    return subDashAudioTracks.find((track) =>
-      generateLabelFromTrack(track) === videojsAudioTrack.label
-    );
-  }
+  const uiLanguage = uiLanguageOf(tech);
 
   // Safari creates a single native `AudioTrack` (not `videojs.AudioTrack`) when loading. Clear all
   // automatically generated audio tracks so we can create them all ourself.
@@ -39,48 +63,49 @@ function handleAudioTracksAdded(tech, shakaPlayer, tracks) {
     tech.clearTracks(['audio']);
   }
 
-  const currentAudioTrack = tracks[0];
+  const currentAudioTrack = tracks.find((track) => track.active) || tracks[0];
 
-  tracks.forEach((dashTrack, index) => {
-    const label = generateLabelFromTrack(dashTrack);
+  // map the video.js track id back to the shaka track it was created from
+  const trackDictionary = {};
 
-    if (dashTrack === currentAudioTrack) {
+  tracks.forEach((shakaTrack, index) => {
+    const id = `shaka-audio-${index}`;
+    const enabled = shakaTrack === currentAudioTrack;
+
+    trackDictionary[id] = shakaTrack;
+
+    if (enabled) {
       tech.trigger('shakaaudiotrackchange', {
-        language: dashTrack.language
+        language: shakaTrack.language
       });
     }
 
     // Add the track to the player's audio track list.
-    videojsAudioTracks.addTrack(
-      new videojs.AudioTrack({
-        enabled: dashTrack === currentAudioTrack,
-        id: generateIdFromTrackIndex(index),
-        kind: 'main',
-        label,
-        language: dashTrack.language
-      })
-    );
+    videojsAudioTracks.addTrack(new videojs.AudioTrack({
+      enabled,
+      id,
+      kind: 'main',
+      label: audioTrackLabel(shakaTrack, uiLanguage),
+      language: shakaTrack.language
+    }));
   });
 
   const audioTracksChangeHandler = () => {
     for (let i = 0; i < videojsAudioTracks.length; i++) {
       const track = videojsAudioTracks[i];
 
-      if (track.enabled) {
-        // Find the audio track we just selected by the id
-        const dashAudioTrack = findDashAudioTrack(tracks, track);
+      if (!track.enabled) {
+        continue;
+      }
 
-        if (dashAudioTrack) {
-          // Set is as the current track
-          tech.trigger('shakaaudiotrackchange', {
-            language: dashAudioTrack.language
-          });
-          shakaPlayer.selectAudioLanguage(dashAudioTrack.language, dashAudioTrack.role);
+      // Find the shaka track that matches the video.js track we just selected
+      const shakaTrack = trackDictionary[track.id];
 
-          // Stop looping
-          continue;
-        }
-
+      if (shakaTrack && !shakaTrack.active) {
+        tech.trigger('shakaaudiotrackchange', {
+          language: shakaTrack.language
+        });
+        shakaPlayer.selectAudioTrack(shakaTrack);
       }
     }
   };
@@ -91,6 +116,15 @@ function handleAudioTracksAdded(tech, shakaPlayer, tracks) {
   });
 }
 
+/**
+ * Mirror shaka player's audio tracks into the video.js audio track list.
+ *
+ * @param {Tech} tech
+ *        The video.js tech being used.
+ *
+ * @param {shaka.Player} shakaPlayer
+ *        The shaka player instance.
+ */
 export default function setupAudioTracks(tech, shakaPlayer) {
-  handleAudioTracksAdded(tech, shakaPlayer, shakaPlayer.getAudioLanguagesAndRoles());
+  handleAudioTracksAdded(tech, shakaPlayer, dedupeAudioTracks(shakaPlayer.getAudioTracks(), uiLanguageOf(tech)));
 }
