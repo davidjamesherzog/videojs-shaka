@@ -1,5 +1,6 @@
 import videojs from 'video.js';
 import {audioTrackLabel, uiLanguageOf} from './track-label';
+import type {ShakaPlayer, ShakaTrack} from './types';
 
 /**
  * Shaka Player reports one audio track per audio stream, so a language that is
@@ -17,9 +18,9 @@ import {audioTrackLabel, uiLanguageOf} from './track-label';
  * @return {shaka.extern.AudioTrack[]}
  *         One track per distinct choice.
  */
-export function dedupeAudioTracks(tracks, uiLanguage) {
-  const byKey = {};
-  const result = [];
+export function dedupeAudioTracks(tracks: ShakaTrack[], uiLanguage?: string): ShakaTrack[] {
+  const byKey: Record<string, number> = {};
+  const result: ShakaTrack[] = [];
 
   tracks.forEach((track) => {
     // the label already folds in language, non-default roles and channel layout
@@ -52,7 +53,7 @@ export function dedupeAudioTracks(tracks, uiLanguage) {
  * @param {shaka.extern.AudioTrack[]} tracks
  *        The audio tracks reported by shaka player.
  */
-function handleAudioTracksAdded(tech, shakaPlayer, tracks) {
+function handleAudioTracksAdded(tech: any, shakaPlayer: ShakaPlayer, tracks: ShakaTrack[]): void {
 
   const videojsAudioTracks = tech.audioTracks();
   const uiLanguage = uiLanguageOf(tech);
@@ -66,7 +67,7 @@ function handleAudioTracksAdded(tech, shakaPlayer, tracks) {
   const currentAudioTrack = tracks.find((track) => track.active) || tracks[0];
 
   // map the video.js track id back to the shaka track it was created from
-  const trackDictionary = {};
+  const trackDictionary: Record<string, ShakaTrack> = {};
 
   tracks.forEach((shakaTrack, index) => {
     const id = `shaka-audio-${index}`;
@@ -125,6 +126,6 @@ function handleAudioTracksAdded(tech, shakaPlayer, tracks) {
  * @param {shaka.Player} shakaPlayer
  *        The shaka player instance.
  */
-export default function setupAudioTracks(tech, shakaPlayer) {
+export default function setupAudioTracks(tech: any, shakaPlayer: ShakaPlayer): void {
   handleAudioTracksAdded(tech, shakaPlayer, dedupeAudioTracks(shakaPlayer.getAudioTracks(), uiLanguageOf(tech)));
 }

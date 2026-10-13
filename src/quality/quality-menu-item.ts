@@ -1,8 +1,13 @@
 import videojs from 'video.js';
 
-const VjsMenuItem = videojs.getComponent('MenuItem');
+// the video.js typings do not describe the subclassable surface of components
+const VjsMenuItem = videojs.getComponent('MenuItem') as any;
 
 class QualityMenuItem extends VjsMenuItem {
+
+  constructor(player: any, options: unknown) {
+    super(player, options);
+  }
 
   handleClick() {
     super.handleClick();

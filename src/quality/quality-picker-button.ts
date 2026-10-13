@@ -2,9 +2,9 @@ import videojs from 'video.js';
 import QualityMenu from './quality-menu';
 import QualityMenuItem from './quality-menu-item';
 
-const VjsButton = videojs.getComponent('MenuButton');
+const VjsButton = videojs.getComponent('MenuButton') as any;
 
-const TRACK_CLASS = {
+const TRACK_CLASS: Record<string, string> = {
   video: 'vjs-icon-hd',
   audio: 'vjs-icon-cog',
   subtitle: 'vjs-icon-subtitles'
@@ -12,7 +12,7 @@ const TRACK_CLASS = {
 
 class QualityPickerButton extends VjsButton {
 
-  constructor(player, options) {
+  constructor(player: any, options: unknown) {
     super(player, options);
   }
 

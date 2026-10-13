@@ -1,6 +1,6 @@
 import videojs from 'video.js';
 
-const VjsMenu = videojs.getComponent('Menu');
+const VjsMenu = videojs.getComponent('Menu') as any;
 
 /**
  * The drop-down menu of a quality picker button.
@@ -18,7 +18,7 @@ class QualityMenu extends VjsMenu {
    * @param {Object} options
    *        The menu button's options.
    */
-  constructor(player, options) {
+  constructor(player: any, options: unknown) {
     super(player, options);
 
     this.on(player, 'qualitytrackchange', () => this.hide());
@@ -30,11 +30,11 @@ class QualityMenu extends VjsMenu {
    * @param {MenuItem} component
    *        The item to add.
    */
-  addItem(component) {
+  addItem(component: any) {
     super.addItem(component);
 
     component.on(['tap', 'click'], () => {
-      this.children().forEach((child) => {
+      this.children().forEach((child: any) => {
         if (child !== component) {
           child.selected(false);
         }
