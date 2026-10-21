@@ -1,9 +1,17 @@
+import type Player from 'video.js/dist/types/player';
+import type ControlBar from 'video.js/dist/types/control-bar/control-bar';
 import QualityPickerButton from './quality/quality-picker-button';
+import type {QualityData, QualitySwitchCallback} from './types';
 
-export default function qualityPickerPlugin() {
+interface LoadedQualityData {
+  qualityData: QualityData;
+  qualitySwitchCallback: QualitySwitchCallback;
+}
+
+export default function qualityPickerPlugin(this: Player & {controlBar: ControlBar}) {
   const player = this;
 
-  const SUPPORTED_TRACKS = ['video', 'audio', 'subtitle'];
+  const SUPPORTED_TRACKS = ['video', 'audio', 'subtitle'] as const;
 
   // On later versions `player.tech` is undefined before this...
   if (player.tech_) {
@@ -14,10 +22,12 @@ export default function qualityPickerPlugin() {
     }, true);
   }
 
-  function onQualityData(event, {qualityData, qualitySwitchCallback}) {
+  function onQualityData(event: Event, {qualityData, qualitySwitchCallback}: LoadedQualityData) {
     const fullscreenToggle = player.controlBar.getChild('fullscreenToggle');
 
-    player.controlBar.removeChild(fullscreenToggle);
+    if (fullscreenToggle) {
+      player.controlBar.removeChild(fullscreenToggle);
+    }
 
     for (let i = 0; i < SUPPORTED_TRACKS.length; i++) {
       const track = SUPPORTED_TRACKS[i];
@@ -33,8 +43,10 @@ export default function qualityPickerPlugin() {
         player.controlBar.removeChild(qualityPickerButton);
       }
 
-      if (qualityData[track] && qualityData[track].length > 1) {
-        qualityPickerButton = new QualityPickerButton(player, {name, qualityList: qualityData[track], qualitySwitchCallback, trackType: track});
+      const qualityList = qualityData[track];
+
+      if (qualityList && qualityList.length > 1) {
+        qualityPickerButton = new QualityPickerButton(player, {name, qualityList, qualitySwitchCallback, trackType: track});
 
         player.controlBar.addChild(qualityPickerButton);
       }

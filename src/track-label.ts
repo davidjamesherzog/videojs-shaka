@@ -1,4 +1,6 @@
 import window from 'global/window';
+import type {ShakaTrack} from './types';
+import type Shaka from './shaka';
 
 // labels that packagers generate automatically and that mean nothing to a viewer,
 // e.g. `stream_0`, `audio-2`, `track 3`, `subtitles`
@@ -17,7 +19,7 @@ const GENERIC_LABEL_RE = /^(stream|track|audio|video|text|sub|subs|subtitle|subt
  * @return {boolean}
  *         Whether the label should be shown to the viewer.
  */
-export function isMeaningfulLabel(label, language) {
+export function isMeaningfulLabel(label: string | null | undefined, language?: string): boolean {
   if (typeof label !== 'string' || !label.trim()) {
     return false;
   }
@@ -49,7 +51,7 @@ export function isMeaningfulLabel(label, language) {
  * @return {string}
  *         A display name, or the original code.
  */
-export function languageDisplayName(language, uiLanguage = 'en') {
+export function languageDisplayName(language: string, uiLanguage = 'en'): string {
   if (!language) {
     return '';
   }
@@ -79,7 +81,7 @@ export function languageDisplayName(language, uiLanguage = 'en') {
  * @return {string}
  *         A short description, or an empty string for mono/stereo/unknown.
  */
-export function channelLayout(channelsCount) {
+export function channelLayout(channelsCount?: number | null): string {
   if (!channelsCount || channelsCount <= 2) {
     return '';
   }
@@ -109,12 +111,12 @@ export function channelLayout(channelsCount) {
  *
  * @private
  */
-function baseLabel(track, uiLanguage) {
+function baseLabel(track: Partial<ShakaTrack>, uiLanguage?: string): string {
   if (isMeaningfulLabel(track.label, track.language)) {
-    return track.label.trim();
+    return (track.label as string).trim();
   }
 
-  return languageDisplayName(track.language, uiLanguage) || track.label || '';
+  return languageDisplayName(track.language as string, uiLanguage) || track.label || '';
 }
 
 /**
@@ -129,7 +131,7 @@ function baseLabel(track, uiLanguage) {
  * @return {string}
  *         A readable label such as `English` or `English (forced)`.
  */
-export function textTrackLabel(track, uiLanguage) {
+export function textTrackLabel(track: Partial<ShakaTrack>, uiLanguage?: string): string {
   const label = baseLabel(track, uiLanguage);
 
   if (track.forced && !/forced/i.test(label)) {
@@ -153,7 +155,7 @@ export function textTrackLabel(track, uiLanguage) {
  *         A readable label such as `English`, `English (description)` or
  *         `English (5.1)`.
  */
-export function audioTrackLabel(track, uiLanguage) {
+export function audioTrackLabel(track: Partial<ShakaTrack>, uiLanguage?: string): string {
   const label = baseLabel(track, uiLanguage);
   const extras = (track.roles || []).filter((role) => role && role !== 'main');
   const layout = channelLayout(track.channelsCount);
@@ -178,7 +180,7 @@ export function audioTrackLabel(track, uiLanguage) {
  * @return {string}
  *         The player's language, defaulting to `en`.
  */
-export function uiLanguageOf(tech) {
+export function uiLanguageOf(tech: Shaka): string {
   const player = tech && typeof tech.getPlayer_ === 'function' ? tech.getPlayer_() : null;
 
   return (player && player.language && player.language()) || 'en';
