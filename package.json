@@ -2,14 +2,29 @@
   "name": "videojs-shaka",
   "version": "1.1.2",
   "description": "video.js shaka player tech",
+  "keywords": [
+    "shaka-player",
+    "videojs",
+    "videojs-plugin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davidjamesherzog/videojs-shaka"
+  },
+  "license": "MIT",
+  "author": "Dave Herzog <davidjherzog@gmail.com>",
   "main": "dist/videojs-shaka.cjs.js",
   "module": "dist/videojs-shaka.es.js",
   "browser": "dist/videojs-shaka.js",
-  "generator-videojs-plugin": {
-    "version": "9.0.0"
-  },
-  "browserslist": [
-    "defaults"
+  "types": "dist/types/plugin.d.ts",
+  "files": [
+    "CONTRIBUTING.md",
+    "dist/",
+    "docs/",
+    "index.html",
+    "scripts/",
+    "src/",
+    "test/"
   ],
   "scripts": {
     "build": "npm-run-all -s clean -p build:*",
@@ -38,41 +53,17 @@
     "typecheck": "tsc -p tsconfig.json",
     "format": "prettier --write ."
   },
-  "engines": {
-    "node": ">=24",
-    "npm": ">=10"
-  },
-  "keywords": [
-    "shaka-player",
-    "videojs",
-    "videojs-plugin"
-  ],
-  "author": "Dave Herzog <davidjherzog@gmail.com>",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/davidjamesherzog/videojs-shaka"
-  },
-  "files": [
-    "CONTRIBUTING.md",
-    "dist/",
-    "docs/",
-    "index.html",
-    "scripts/",
-    "src/",
-    "test/"
-  ],
   "lint-staged": {
     "*.{ts,js,json,css}": "prettier --write",
     "README.md": "doctoc --notitle"
   },
+  "browserslist": [
+    "defaults"
+  ],
   "dependencies": {
     "@babel/runtime": "^7.28.4",
     "global": "^4.4.0",
     "video.js": "^8"
-  },
-  "peerDependencies": {
-    "shaka-player": "^4.14.0 || ^5.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
@@ -97,5 +88,14 @@
     "videojs-generator-verify": "~4.1.3",
     "videojs-standard": "^9.1.0"
   },
-  "types": "dist/types/plugin.d.ts"
+  "peerDependencies": {
+    "shaka-player": "^4.14.0 || ^5.0.0"
+  },
+  "engines": {
+    "node": ">=24",
+    "npm": ">=10"
+  },
+  "generator-videojs-plugin": {
+    "version": "9.0.0"
+  }
 }

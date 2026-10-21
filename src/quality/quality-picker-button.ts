@@ -1,6 +1,6 @@
 import type Player from 'video.js/dist/types/player'
-import {MenuButton as VjsButton} from '../videojs-classes'
 import type {QualityEntry, QualitySwitchCallback} from '../types'
+import {MenuButton as VjsButton} from '../videojs-classes'
 import QualityMenu from './quality-menu'
 import QualityMenuItem from './quality-menu-item'
 

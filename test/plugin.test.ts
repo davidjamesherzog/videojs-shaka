@@ -7,13 +7,13 @@ import videojs from 'video.js'
 
 import type Player from 'video.js/dist/types/player'
 
-import plugin from '../src/plugin'
 import {version as VERSION} from '../package.json'
-import type {QualityData, ShakaErrorStatic, ShakaNamespace, ShakaTrack} from '../src/types'
+import plugin from '../src/plugin'
 import {dedupeAudioTracks} from '../src/setup-audio-tracks'
+import {buildQualityList, pickVariantForBandwidth, pickVariantForHeight} from '../src/setup-quality-tracks'
+import {audioTrackLabel, isMeaningfulLabel, languageDisplayName, textTrackLabel} from '../src/track-label'
+import type {QualityData, ShakaErrorStatic, ShakaNamespace, ShakaTrack} from '../src/types'
 import VideojsTextDisplayer, {cueToText} from '../src/videojs-text-displayer'
-import {isMeaningfulLabel, languageDisplayName, textTrackLabel, audioTrackLabel} from '../src/track-label'
-import {buildQualityList, pickVariantForHeight, pickVariantForBandwidth} from '../src/setup-quality-tracks'
 
 const shaka = window.shaka as ShakaNamespace & {util: {Error: ShakaErrorStatic}}
 
@@ -22,6 +22,9 @@ interface TestContext {
   video: HTMLVideoElement
   player: Player
 }
+
+// QUnit hands the test context to `function` callbacks as `this`; a shared object lets the tests use arrow functions
+const ctx = {} as TestContext
 
 const PlayerClass = videojs.getComponent('Player')
 
@@ -49,7 +52,7 @@ const DASH_SOURCE = {
   src: 'https://example.com/manifest.mpd'
 }
 
-QUnit.test('the environment is sane', function (this: TestContext, assert) {
+QUnit.test('the environment is sane', (assert) => {
   assert.strictEqual(typeof Array.isArray, 'function', 'es5 exists')
   assert.strictEqual(typeof sinon, 'object', 'sinon exists')
   assert.strictEqual(typeof videojs, 'function', 'videojs exists')
@@ -58,20 +61,20 @@ QUnit.test('the environment is sane', function (this: TestContext, assert) {
 })
 
 QUnit.module('videojs-shaka', {
-  beforeEach(this: TestContext) {
-    this.fixture = document.getElementById('qunit-fixture') as HTMLElement
-    this.video = document.createElement('video')
-    this.fixture.appendChild(this.video)
-    this.player = videojs(this.video, {techOrder: ['shaka', 'html5']})
+  beforeEach() {
+    ctx.fixture = document.getElementById('qunit-fixture') as HTMLElement
+    ctx.video = document.createElement('video')
+    ctx.fixture.appendChild(ctx.video)
+    ctx.player = videojs(ctx.video, {techOrder: ['shaka', 'html5']})
   },
 
-  afterEach(this: TestContext) {
-    this.player.dispose()
+  afterEach() {
+    ctx.player.dispose()
     sinon.restore()
   }
 })
 
-QUnit.test('registers itself with video.js', function (this: TestContext, assert) {
+QUnit.test('registers itself with video.js', (assert) => {
   assert.ok(Object.is(videojs.getTech('Shaka'), plugin), 'the Shaka tech was registered')
   assert.strictEqual(plugin.VERSION, VERSION, 'the tech exposes a version')
   assert.strictEqual(
@@ -81,7 +84,7 @@ QUnit.test('registers itself with video.js', function (this: TestContext, assert
   )
 })
 
-QUnit.test('claims DASH and HLS sources', function (this: TestContext, assert) {
+QUnit.test('claims DASH and HLS sources', (assert) => {
   assert.strictEqual(plugin.canPlaySource({type: 'application/dash+xml'}), 'probably', 'dash')
   assert.strictEqual(plugin.canPlaySource({type: 'application/x-mpegURL'}), 'probably', 'hls')
   assert.strictEqual(plugin.canPlaySource({type: 'application/vnd.apple.mpegurl'}), 'probably', 'apple hls')
@@ -89,22 +92,22 @@ QUnit.test('claims DASH and HLS sources', function (this: TestContext, assert) {
   assert.ok(plugin.isSupported(), 'the tech is supported in the test browser')
 })
 
-QUnit.test('loads DASH sources through shaka player', function (this: TestContext, assert) {
+QUnit.test('loads DASH sources through shaka player', (assert) => {
   const done = assert.async()
   const load = sinon.stub(shaka.Player.prototype, 'load').resolves()
 
-  this.player.one('loadedqualitydata', () => {
+  ctx.player.one('loadedqualitydata', () => {
     assert.ok(true, 'quality data is published once the manifest loads')
   })
 
-  this.player.src(DASH_SOURCE)
+  ctx.player.src(DASH_SOURCE)
 
-  this.player.ready(() => {
-    assert.strictEqual(this.player.techName_, 'Shaka', 'the Shaka tech was selected')
-    assert.ok(this.player.tech_.shaka_ instanceof shaka.Player, 'a shaka player was created')
-    assert.ok(this.player.hasClass('vjs-shaka'), 'the tech adds a class to the player')
+  ctx.player.ready(() => {
+    assert.strictEqual(ctx.player.techName_, 'Shaka', 'the Shaka tech was selected')
+    assert.ok(ctx.player.tech_.shaka_ instanceof shaka.Player, 'a shaka player was created')
+    assert.ok(ctx.player.hasClass('vjs-shaka'), 'the tech adds a class to the player')
 
-    this.player.tech_.one('loadedqualitydata', (event: Event, {qualityData}: {qualityData: QualityData}) => {
+    ctx.player.tech_.one('loadedqualitydata', (event: Event, {qualityData}: {qualityData: QualityData}) => {
       assert.ok(load.calledOnce, 'shaka player load was called once')
       assert.deepEqual(
         load.firstCall.args,
@@ -113,8 +116,8 @@ QUnit.test('loads DASH sources through shaka player', function (this: TestContex
       )
       assert.deepEqual(qualityData.video, [], 'no qualities are listed for an empty manifest')
       assert.strictEqual(
-        this.player.tech_.shaka_.getConfiguration().textDisplayFactory,
-        this.player.tech_.textDisplayFactory_,
+        ctx.player.tech_.shaka_.getConfiguration().textDisplayFactory,
+        ctx.player.tech_.textDisplayFactory_,
         "shaka renders text through the tech's text displayer"
       )
       done()
@@ -122,7 +125,7 @@ QUnit.test('loads DASH sources through shaka player', function (this: TestContex
   })
 })
 
-QUnit.test('surfaces critical shaka errors on the player', function (this: TestContext, assert) {
+QUnit.test('surfaces critical shaka errors on the player', (assert) => {
   const done = assert.async()
   const shakaError = new shaka.util.Error(
     shaka.util.Error.Severity.CRITICAL,
@@ -132,18 +135,18 @@ QUnit.test('surfaces critical shaka errors on the player', function (this: TestC
 
   sinon.stub(shaka.Player.prototype, 'load').rejects(shakaError)
 
-  this.player.one('error', () => {
-    const error = this.player.error()
+  ctx.player.one('error', () => {
+    const error = ctx.player.error()
 
     assert.strictEqual(error?.code, 2, 'network errors map to MEDIA_ERR_NETWORK')
     assert.ok(error?.message.indexOf(String(shakaError.code)) === 0, 'the message carries the shaka error code')
     done()
   })
 
-  this.player.src(DASH_SOURCE)
+  ctx.player.src(DASH_SOURCE)
 })
 
-QUnit.test('ignores recoverable shaka errors', function (this: TestContext, assert) {
+QUnit.test('ignores recoverable shaka errors', (assert) => {
   const done = assert.async()
   const shakaError = new shaka.util.Error(
     shaka.util.Error.Severity.RECOVERABLE,
@@ -154,15 +157,15 @@ QUnit.test('ignores recoverable shaka errors', function (this: TestContext, asse
   sinon.stub(shaka.Player.prototype, 'load').rejects(shakaError)
   const warn = sinon.stub(videojs.log, 'warn')
 
-  this.player.src(DASH_SOURCE)
+  ctx.player.src(DASH_SOURCE)
 
-  this.player.ready(() => {
+  ctx.player.ready(() => {
     // the load rejection is handled asynchronously
-    this.player.tech_.shakaReady_
+    ctx.player.tech_.shakaReady_
       .then(() => Promise.resolve())
       .then(() => Promise.resolve())
       .then(() => {
-        assert.strictEqual(this.player.error(), null, 'no error was set on the player')
+        assert.strictEqual(ctx.player.error(), null, 'no error was set on the player')
         assert.ok(warn.called, 'the recoverable error was logged')
         done()
       })
@@ -171,7 +174,7 @@ QUnit.test('ignores recoverable shaka errors', function (this: TestContext, asse
 
 QUnit.module('videojs-shaka track helpers')
 
-QUnit.test('dedupeAudioTracks collapses codec variants of the same language', function (this: TestContext, assert) {
+QUnit.test('dedupeAudioTracks collapses codec variants of the same language', (assert) => {
   const tracks = [
     {language: 'es', roles: [], label: null, codecs: 'mp4a.40.2', channelsCount: 2, active: false},
     {language: 'en', roles: ['main'], label: null, codecs: 'mp4a.40.2', channelsCount: 2, active: false},
@@ -192,7 +195,7 @@ QUnit.test('dedupeAudioTracks collapses codec variants of the same language', fu
   )
 })
 
-QUnit.test('track labels are readable', function (this: TestContext, assert) {
+QUnit.test('track labels are readable', (assert) => {
   assert.notOk(isMeaningfulLabel('stream_0', 'en'), 'auto-generated packager names are not meaningful')
   assert.notOk(isMeaningfulLabel('audio-2', 'en'), 'auto-generated packager names are not meaningful')
   assert.notOk(isMeaningfulLabel('subtitles', 'en'), 'bare kind names are not meaningful')
@@ -239,7 +242,7 @@ QUnit.test('track labels are readable', function (this: TestContext, assert) {
   )
 })
 
-QUnit.test('cueToText flattens nested cues and line breaks', function (this: TestContext, assert) {
+QUnit.test('cueToText flattens nested cues and line breaks', (assert) => {
   assert.strictEqual(cueToText({payload: 'plain'}), 'plain', 'plain payload')
   assert.strictEqual(
     cueToText({
@@ -262,21 +265,21 @@ QUnit.test('cueToText flattens nested cues and line breaks', function (this: Tes
 })
 
 QUnit.module('videojs-shaka text displayer', {
-  beforeEach(this: TestContext) {
-    this.fixture = document.getElementById('qunit-fixture') as HTMLElement
-    this.video = document.createElement('video')
-    this.fixture.appendChild(this.video)
-    this.player = videojs(this.video, {techOrder: ['shaka', 'html5']})
+  beforeEach() {
+    ctx.fixture = document.getElementById('qunit-fixture') as HTMLElement
+    ctx.video = document.createElement('video')
+    ctx.fixture.appendChild(ctx.video)
+    ctx.player = videojs(ctx.video, {techOrder: ['shaka', 'html5']})
   },
 
-  afterEach(this: TestContext) {
-    this.player.dispose()
+  afterEach() {
+    ctx.player.dispose()
     sinon.restore()
   }
 })
 
-QUnit.test('feeds cues to the mirrored video.js track', function (this: TestContext, assert) {
-  const tech = this.player.tech_
+QUnit.test('feeds cues to the mirrored video.js track', (assert) => {
+  const tech = ctx.player.tech_
   const textTrack = tech.addRemoteTextTrack({kind: 'subtitles', language: 'en', label: 'en'}, false).track
 
   textTrack.mode = 'showing'
@@ -314,7 +317,7 @@ QUnit.test('feeds cues to the mirrored video.js track', function (this: TestCont
   })
 })
 
-QUnit.test('quality list has one entry per height across audio tracks', function (this: TestContext, assert) {
+QUnit.test('quality list has one entry per height across audio tracks', (assert) => {
   const variant = (
     id: number,
     height: number,
@@ -394,7 +397,7 @@ QUnit.test('quality list has one entry per height across audio tracks', function
   assert.strictEqual(buildQualityList([variants[0]]).length, 1, 'no auto entry when there is a single quality')
 })
 
-QUnit.test('going back to auto picks the quality the bandwidth allows', function (this: TestContext, assert) {
+QUnit.test('going back to auto picks the quality the bandwidth allows', (assert) => {
   const variant = (
     id: number,
     height: number,

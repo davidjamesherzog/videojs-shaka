@@ -1,5 +1,5 @@
-import type Player from 'video.js/dist/types/player'
 import type ControlBar from 'video.js/dist/types/control-bar/control-bar'
+import type Player from 'video.js/dist/types/player'
 import QualityPickerButton from './quality/quality-picker-button'
 import type {QualityData, QualitySwitchCallback} from './types'
 
@@ -17,7 +17,7 @@ export default function qualityPickerPlugin(this: Player & {controlBar: ControlB
   if (player.tech_) {
     player.tech_.on('loadedqualitydata', onQualityData)
   } else {
-    player.ready(function () {
+    player.ready(() => {
       player.tech_.on('loadedqualitydata', onQualityData)
     }, true)
   }

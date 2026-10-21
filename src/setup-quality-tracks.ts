@@ -1,5 +1,5 @@
-import type {QualityEntry, ShakaAbrConfiguration, ShakaPlayer, ShakaRestrictions, ShakaTrack} from './types'
 import type Shaka from './shaka'
+import type {QualityEntry, ShakaAbrConfiguration, ShakaPlayer, ShakaRestrictions, ShakaTrack} from './types'
 
 /**
  * Label a video height, e.g. `1080p (HD)`.

@@ -1,6 +1,6 @@
 import window from 'global/window'
-import type {ShakaCue, ShakaTextDisplayer, ShakaTextTrackEntry, ShakaTrack} from './types'
 import type Shaka from './shaka'
+import type {ShakaCue, ShakaTextDisplayer, ShakaTextTrackEntry, ShakaTrack} from './types'
 
 /**
  * Flatten a shaka cue (which may be a tree of nested cues carrying styling)

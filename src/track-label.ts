@@ -1,6 +1,6 @@
 import window from 'global/window'
-import type {ShakaTrack} from './types'
 import type Shaka from './shaka'
+import type {ShakaTrack} from './types'
 
 // labels that packagers generate automatically and that mean nothing to a viewer,
 // e.g. `stream_0`, `audio-2`, `track 3`, `subtitles`

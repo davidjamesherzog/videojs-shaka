@@ -1,5 +1,5 @@
-import type Player from 'video.js/dist/types/player'
 import type MenuItem from 'video.js/dist/types/menu/menu-item'
+import type Player from 'video.js/dist/types/player'
 import {Menu as VjsMenu} from '../videojs-classes'
 import type {QualityPickerButtonOptions} from './quality-picker-button'
 

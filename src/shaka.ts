@@ -1,15 +1,13 @@
-import videojs from 'video.js'
 import window from 'global/window'
-import setupQualityTracks from './setup-quality-tracks'
-import setupTextTracks from './setup-text-tracks'
-import setupAudioTracks from './setup-audio-tracks'
-import VideojsTextDisplayer from './videojs-text-displayer'
-import {Html5} from './videojs-classes'
-import {version as VERSION} from '../package.json'
+import videojs from 'video.js'
 import type MediaError from 'video.js/dist/types/media-error'
 import type Player from 'video.js/dist/types/player'
 import type AudioTrackList from 'video.js/dist/types/tracks/audio-track-list'
 import type TextTrackList from 'video.js/dist/types/tracks/text-track-list'
+import {version as VERSION} from '../package.json'
+import setupAudioTracks from './setup-audio-tracks'
+import setupQualityTracks from './setup-quality-tracks'
+import setupTextTracks from './setup-text-tracks'
 import type {
   ShakaError,
   ShakaPlayer,
@@ -19,6 +17,8 @@ import type {
   ShakaTextTrackEntry,
   VjsAudioTrack
 } from './types'
+import {Html5} from './videojs-classes'
+import VideojsTextDisplayer from './videojs-text-displayer'
 
 // mime types that shaka player can play
 const SHAKA_TYPE_RE = /^(application\/dash\+xml|application\/x-mpegurl|application\/vnd\.apple\.mpegurl)$/i
@@ -339,7 +339,7 @@ Shaka.VERSION = VERSION
  * @return {boolean}
  *         Whether or not the tech is supported.
  */
-Shaka.isSupported = function (): boolean {
+Shaka.isSupported = (): boolean => {
   return !!(window.shaka && window.shaka.Player && window.shaka.Player.isBrowserSupported())
 }
 
@@ -352,7 +352,7 @@ Shaka.isSupported = function (): boolean {
  * @return {string}
  *         'probably' for DASH and HLS, otherwise an empty string.
  */
-Shaka.canPlayType = function (type: string): string {
+Shaka.canPlayType = (type: string): string => {
   return SHAKA_TYPE_RE.test(type) ? 'probably' : ''
 }
 
@@ -365,7 +365,7 @@ Shaka.canPlayType = function (type: string): string {
  * @return {string}
  *         'probably' for DASH and HLS, otherwise an empty string.
  */
-Shaka.canPlaySource = function (source: {type: string}): string {
+Shaka.canPlaySource = (source: {type: string}): string => {
   return Shaka.canPlayType(source.type)
 }
 

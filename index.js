@@ -32,7 +32,7 @@ player.src([
 const stream = document.getElementById('stream')
 const play = document.getElementById('play')
 
-play.addEventListener('click', function () {
+play.addEventListener('click', () => {
   let type = 'application/dash+xml'
 
   if (stream.value.indexOf('m3u8') > -1) {

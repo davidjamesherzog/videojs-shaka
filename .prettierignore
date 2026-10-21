@@ -6,3 +6,4 @@ package-lock.json
 CHANGELOG.md
 *.md
 index.html
+.claude

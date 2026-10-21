@@ -1,6 +1,6 @@
+import type Shaka from './shaka'
 import {textTrackLabel, uiLanguageOf} from './track-label'
 import type {ShakaPlayer, ShakaTextTrackEntry, ShakaTrack} from './types'
-import type Shaka from './shaka'
 
 /**
  * Select a shaka text track, or hide text entirely when `track` is falsy.
@@ -66,7 +66,6 @@ function attachShakaTextTracksToVideojs(
         kind: track.kind || 'subtitles'
       }
     }))
-
     // Add track to videojs track list
     .map(({trackConfig, shakaTrack}) => {
       const remoteTextTrack = tech.addRemoteTextTrack(trackConfig, false)

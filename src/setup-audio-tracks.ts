@@ -1,7 +1,7 @@
 import videojs from 'video.js'
+import type Shaka from './shaka'
 import {audioTrackLabel, uiLanguageOf} from './track-label'
 import type {ShakaPlayer, ShakaTrack} from './types'
-import type Shaka from './shaka'
 
 /**
  * Shaka Player reports one audio track per audio stream, so a language that is
