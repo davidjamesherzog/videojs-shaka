@@ -1,7 +1,7 @@
-import type Player from 'video.js/dist/types/player';
-import type MenuItem from 'video.js/dist/types/menu/menu-item';
-import {Menu as VjsMenu} from '../videojs-classes';
-import type {QualityPickerButtonOptions} from './quality-picker-button';
+import type Player from 'video.js/dist/types/player'
+import type MenuItem from 'video.js/dist/types/menu/menu-item'
+import {Menu as VjsMenu} from '../videojs-classes'
+import type {QualityPickerButtonOptions} from './quality-picker-button'
 
 /**
  * The drop-down menu of a quality picker button.
@@ -9,7 +9,6 @@ import type {QualityPickerButtonOptions} from './quality-picker-button';
  * @extends Menu
  */
 class QualityMenu extends VjsMenu {
-
   /**
    * Create a menu.
    *
@@ -20,12 +19,12 @@ class QualityMenu extends VjsMenu {
    *        The menu button's options.
    */
   constructor(player: Player, options: QualityPickerButtonOptions) {
-    super(player, options);
+    super(player, options)
 
-    const hide = () => this.hide();
+    const hide = () => this.hide()
 
-    player.on('qualitytrackchange', hide);
-    this.on('dispose', () => player.off('qualitytrackchange', hide));
+    player.on('qualitytrackchange', hide)
+    this.on('dispose', () => player.off('qualitytrackchange', hide))
   }
 
   /**
@@ -35,17 +34,16 @@ class QualityMenu extends VjsMenu {
    *        The item to add.
    */
   addItem(component: MenuItem) {
-    super.addItem(component);
+    super.addItem(component)
 
     component.on(['tap', 'click'], () => {
       this.children().forEach((child) => {
         if (child !== component) {
-          child.selected(false);
+          child.selected(false)
         }
-      });
-    });
+      })
+    })
   }
-
 }
 
-export default QualityMenu;
+export default QualityMenu

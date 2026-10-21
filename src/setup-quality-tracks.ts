@@ -1,5 +1,5 @@
-import type {QualityEntry, ShakaAbrConfiguration, ShakaPlayer, ShakaRestrictions, ShakaTrack} from './types';
-import type Shaka from './shaka';
+import type {QualityEntry, ShakaAbrConfiguration, ShakaPlayer, ShakaRestrictions, ShakaTrack} from './types'
+import type Shaka from './shaka'
 
 /**
  * Label a video height, e.g. `1080p (HD)`.
@@ -11,17 +11,17 @@ import type Shaka from './shaka';
  *         The label.
  */
 function heightLabel(height: number): string {
-  let suffix = '';
+  let suffix = ''
 
   if (height >= 2160) {
-    suffix = ' (4k)';
+    suffix = ' (4k)'
   } else if (height >= 1440) {
-    suffix = ' (2k)';
+    suffix = ' (2k)'
   } else if (height >= 720) {
-    suffix = ' (HD)';
+    suffix = ' (HD)'
   }
 
-  return height + 'p' + suffix;
+  return height + 'p' + suffix
 }
 
 /**
@@ -34,7 +34,7 @@ function heightLabel(height: number): string {
  *         The video variants.
  */
 function videoVariants(variants: ShakaTrack[]): ShakaTrack[] {
-  return variants.filter((t) => t.type === 'variant' && t.height);
+  return variants.filter((t) => t.type === 'variant' && t.height)
 }
 
 /**
@@ -50,16 +50,16 @@ function videoVariants(variants: ShakaTrack[]): ShakaTrack[] {
  *         is its height, and `-1` for `auto`.
  */
 export function buildQualityList(variants: ShakaTrack[]): QualityEntry[] {
-  const byHeight: Record<number, ShakaTrack> = {};
+  const byHeight: Record<number, ShakaTrack> = {}
 
   videoVariants(variants).forEach((variant) => {
-    const height = variant.height as number;
-    const current = byHeight[height];
+    const height = variant.height as number
+    const current = byHeight[height]
 
     if (!current || variant.bandwidth > current.bandwidth) {
-      byHeight[height] = variant;
+      byHeight[height] = variant
     }
-  });
+  })
 
   const qualities: QualityEntry[] = Object.keys(byHeight)
     .map(Number)
@@ -70,17 +70,17 @@ export function buildQualityList(variants: ShakaTrack[]): QualityEntry[] {
       bandwidth: byHeight[height].bandwidth,
       label: heightLabel(height),
       selected: false
-    }));
+    }))
 
   if (qualities.length > 1) {
     qualities.unshift({
       id: -1,
       label: 'auto',
       selected: true
-    });
+    })
   }
 
-  return qualities;
+  return qualities
 }
 
 /**
@@ -99,30 +99,30 @@ export function buildQualityList(variants: ShakaTrack[]): QualityEntry[] {
  *         The variant to select, if any variant has that height.
  */
 export function pickVariantForHeight(variants: ShakaTrack[], height: number): ShakaTrack | undefined {
-  const candidates = videoVariants(variants).filter((t) => t.height === height);
+  const candidates = videoVariants(variants).filter((t) => t.height === height)
 
   if (!candidates.length) {
-    return;
+    return
   }
 
-  const active = variants.find((t) => t.active);
+  const active = variants.find((t) => t.active)
   const score = (t: ShakaTrack) => {
-    let result = 0;
+    let result = 0
 
     if (hasSameAudio(t, active)) {
-      result += 4;
+      result += 4
     }
     if (active && t.videoCodec === active.videoCodec) {
-      result += 2;
+      result += 2
     }
     if (active && t.audioCodec === active.audioCodec) {
-      result += 1;
+      result += 1
     }
 
-    return result;
-  };
+    return result
+  }
 
-  return candidates.sort((a, b) => (score(b) - score(a)) || (b.bandwidth - a.bandwidth))[0];
+  return candidates.sort((a, b) => score(b) - score(a) || b.bandwidth - a.bandwidth)[0]
 }
 
 /**
@@ -139,18 +139,20 @@ export function pickVariantForHeight(variants: ShakaTrack[], height: number): Sh
  */
 function hasSameAudio(track: ShakaTrack, active?: ShakaTrack): boolean {
   if (!active) {
-    return true;
+    return true
   }
 
   if (active.audioId !== null && active.audioId !== undefined) {
-    return track.audioId === active.audioId;
+    return track.audioId === active.audioId
   }
 
-  const rolesOf = (t: ShakaTrack) => (t.audioRoles || t.roles || []).slice().sort().join(',');
+  const rolesOf = (t: ShakaTrack) => (t.audioRoles || t.roles || []).slice().sort().join(',')
 
-  return track.language === active.language &&
+  return (
+    track.language === active.language &&
     rolesOf(track) === rolesOf(active) &&
-    track.channelsCount === active.channelsCount;
+    track.channelsCount === active.channelsCount
+  )
 }
 
 /**
@@ -167,19 +169,26 @@ function hasSameAudio(track: ShakaTrack, active?: ShakaTrack): boolean {
  */
 function withinRestrictions(track: ShakaTrack, restrictions?: ShakaRestrictions): boolean {
   if (!restrictions) {
-    return true;
+    return true
   }
 
   const within = (value: number | null | undefined, min?: number, max?: number) =>
-    value === null || value === undefined ||
-    ((min === undefined || value >= min) && (max === undefined || value <= max));
+    value === null ||
+    value === undefined ||
+    ((min === undefined || value >= min) && (max === undefined || value <= max))
 
-  return within(track.height, restrictions.minHeight, restrictions.maxHeight) &&
+  return (
+    within(track.height, restrictions.minHeight, restrictions.maxHeight) &&
     within(track.width, restrictions.minWidth, restrictions.maxWidth) &&
     within(track.bandwidth, restrictions.minBandwidth, restrictions.maxBandwidth) &&
     within(track.frameRate, restrictions.minFrameRate, restrictions.maxFrameRate) &&
     within(track.channelsCount, restrictions.minChannelsCount, restrictions.maxChannelsCount) &&
-    within(track.height && track.width ? track.height * track.width : null, restrictions.minPixels, restrictions.maxPixels);
+    within(
+      track.height && track.width ? track.height * track.width : null,
+      restrictions.minPixels,
+      restrictions.maxPixels
+    )
+  )
 }
 
 /**
@@ -212,31 +221,31 @@ export function pickVariantForBandwidth(
   abrConfig: ShakaAbrConfiguration = {}
 ): ShakaTrack | undefined {
   if (!estimatedBandwidth || !isFinite(estimatedBandwidth)) {
-    return;
+    return
   }
 
-  const active = variants.find((t) => t.active);
-  let candidates = videoVariants(variants).filter((t) => withinRestrictions(t, abrConfig.restrictions));
-  const sameAudio = candidates.filter((t) => hasSameAudio(t, active));
+  const active = variants.find((t) => t.active)
+  let candidates = videoVariants(variants).filter((t) => withinRestrictions(t, abrConfig.restrictions))
+  const sameAudio = candidates.filter((t) => hasSameAudio(t, active))
 
   if (sameAudio.length) {
-    candidates = sameAudio;
+    candidates = sameAudio
   }
 
   if (!candidates.length) {
-    return;
+    return
   }
 
-  const upgradeTarget = abrConfig.bandwidthUpgradeTarget || 0.85;
+  const upgradeTarget = abrConfig.bandwidthUpgradeTarget || 0.85
   const fits = candidates
     .filter((t) => t.bandwidth <= estimatedBandwidth * upgradeTarget)
-    .sort((a, b) => b.bandwidth - a.bandwidth);
+    .sort((a, b) => b.bandwidth - a.bandwidth)
 
   if (fits.length) {
-    return fits[0];
+    return fits[0]
   }
 
-  return candidates.sort((a, b) => a.bandwidth - b.bandwidth)[0];
+  return candidates.sort((a, b) => a.bandwidth - b.bandwidth)[0]
 }
 
 /**
@@ -250,13 +259,12 @@ export function pickVariantForBandwidth(
  *        The shaka player instance.
  */
 export default function setupQualityTracks(tech: Shaka, shakaPlayer: ShakaPlayer): void {
-
   tech.trigger('loadedqualitydata', {
     qualityData: {
       video: buildQualityList(shakaPlayer.getVariantTracks())
     },
     qualitySwitchCallback(id: number, type: string) {
-      const clearBuffer = true;
+      const clearBuffer = true
 
       // Is auto?
       if (id === -1) {
@@ -267,25 +275,25 @@ export default function setupQualityTracks(tech: Shaka, shakaPlayer: ShakaPlayer
           shakaPlayer.getVariantTracks(),
           shakaPlayer.getStats().estimatedBandwidth,
           shakaPlayer.getConfiguration().abr
-        );
+        )
 
         if (track && !track.active) {
-          shakaPlayer.selectVariantTrack(track, clearBuffer);
+          shakaPlayer.selectVariantTrack(track, clearBuffer)
         }
 
-        shakaPlayer.configure({abr: {enabled: true}});
-        return;
+        shakaPlayer.configure({abr: {enabled: true}})
+        return
       }
 
       // Update the adaptation.
-      shakaPlayer.configure({abr: {enabled: false}});
+      shakaPlayer.configure({abr: {enabled: false}})
 
-      const track = pickVariantForHeight(shakaPlayer.getVariantTracks(), id);
+      const track = pickVariantForHeight(shakaPlayer.getVariantTracks(), id)
 
       // shaka fires `variantchanged` itself for manual selections
       if (track) {
-        shakaPlayer.selectVariantTrack(track, clearBuffer);
+        shakaPlayer.selectVariantTrack(track, clearBuffer)
       }
     }
-  });
+  })
 }

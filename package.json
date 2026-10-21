@@ -22,7 +22,7 @@
     "docs": "npm-run-all docs:*",
     "docs:api": "jsdoc src -r -d docs/api",
     "docs:toc": "doctoc --notitle README.md",
-    "lint": "vjsstandard",
+    "lint": "prettier --check .",
     "prepublishOnly": "npm-run-all build-prod && vjsverify --verbose --skip-es-check",
     "sample": "npm run build && http-server -p 3000",
     "server": "karma start scripts/karma.conf.js --singleRun=false --auto-watch",
@@ -35,7 +35,8 @@
     "watch": "npm-run-all -p watch:*",
     "watch:css": "npm run build:css -- -w",
     "watch:js": "npm run build:js -- -w",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "format": "prettier --write ."
   },
   "engines": {
     "node": ">=24",
@@ -52,13 +53,6 @@
     "type": "git",
     "url": "https://github.com/davidjamesherzog/videojs-shaka"
   },
-  "vjsstandard": {
-    "ignore": [
-      "dist",
-      "docs",
-      "test/dist"
-    ]
-  },
   "files": [
     "CONTRIBUTING.md",
     "dist/",
@@ -69,7 +63,7 @@
     "test/"
   ],
   "lint-staged": {
-    "*.js": "vjsstandard --fix",
+    "*.{ts,js,json,css}": "prettier --write",
     "README.md": "doctoc --notitle"
   },
   "dependencies": {
@@ -92,6 +86,7 @@
     "karma": "^6.4.4",
     "postcss": "^8.5.6",
     "postcss-cli": "^8.3.1",
+    "prettier": "^3.9.10",
     "rollup": "^2.79.2",
     "shaka-player": "^5.2.12",
     "sinon": "^21.0.0",

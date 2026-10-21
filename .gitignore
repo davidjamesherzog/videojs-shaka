@@ -14,7 +14,9 @@ Desktop.ini
 .idea/
 .project/
 .settings/
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 *.iml
 
 # Logs

@@ -1,10 +1,11 @@
-import window from 'global/window';
-import type {ShakaTrack} from './types';
-import type Shaka from './shaka';
+import window from 'global/window'
+import type {ShakaTrack} from './types'
+import type Shaka from './shaka'
 
 // labels that packagers generate automatically and that mean nothing to a viewer,
 // e.g. `stream_0`, `audio-2`, `track 3`, `subtitles`
-const GENERIC_LABEL_RE = /^(stream|track|audio|video|text|sub|subs|subtitle|subtitles|caption|captions|cc|und|undefined|unknown)?[\s_-]*\d*$/i;
+const GENERIC_LABEL_RE =
+  /^(stream|track|audio|video|text|sub|subs|subtitle|subtitles|caption|captions|cc|und|undefined|unknown)?[\s_-]*\d*$/i
 
 /**
  * Whether a track label carries information worth showing, as opposed to an
@@ -21,20 +22,20 @@ const GENERIC_LABEL_RE = /^(stream|track|audio|video|text|sub|subs|subtitle|subt
  */
 export function isMeaningfulLabel(label: string | null | undefined, language?: string): boolean {
   if (typeof label !== 'string' || !label.trim()) {
-    return false;
+    return false
   }
 
-  const trimmed = label.trim();
+  const trimmed = label.trim()
 
   if (GENERIC_LABEL_RE.test(trimmed)) {
-    return false;
+    return false
   }
 
   if (language && trimmed.toLowerCase() === String(language).toLowerCase()) {
-    return false;
+    return false
   }
 
-  return true;
+  return true
 }
 
 /**
@@ -53,23 +54,23 @@ export function isMeaningfulLabel(label: string | null | undefined, language?: s
  */
 export function languageDisplayName(language: string, uiLanguage = 'en'): string {
   if (!language) {
-    return '';
+    return ''
   }
 
   if (window.Intl && typeof window.Intl.DisplayNames === 'function') {
     try {
-      const displayNames = new window.Intl.DisplayNames([uiLanguage, 'en'], {type: 'language'});
-      const name = displayNames.of(language);
+      const displayNames = new window.Intl.DisplayNames([uiLanguage, 'en'], {type: 'language'})
+      const name = displayNames.of(language)
 
       if (name && name.toLowerCase() !== String(language).toLowerCase()) {
-        return name;
+        return name
       }
     } catch (e) {
       // invalid language tag or unsupported locale: fall through to the code
     }
   }
 
-  return language;
+  return language
 }
 
 /**
@@ -83,18 +84,18 @@ export function languageDisplayName(language: string, uiLanguage = 'en'): string
  */
 export function channelLayout(channelsCount?: number | null): string {
   if (!channelsCount || channelsCount <= 2) {
-    return '';
+    return ''
   }
 
   if (channelsCount === 6) {
-    return '5.1';
+    return '5.1'
   }
 
   if (channelsCount === 8) {
-    return '7.1';
+    return '7.1'
   }
 
-  return `${channelsCount}ch`;
+  return `${channelsCount}ch`
 }
 
 /**
@@ -113,10 +114,10 @@ export function channelLayout(channelsCount?: number | null): string {
  */
 function baseLabel(track: Partial<ShakaTrack>, uiLanguage?: string): string {
   if (isMeaningfulLabel(track.label, track.language)) {
-    return (track.label as string).trim();
+    return (track.label as string).trim()
   }
 
-  return languageDisplayName(track.language as string, uiLanguage) || track.label || '';
+  return languageDisplayName(track.language as string, uiLanguage) || track.label || ''
 }
 
 /**
@@ -132,13 +133,13 @@ function baseLabel(track: Partial<ShakaTrack>, uiLanguage?: string): string {
  *         A readable label such as `English` or `English (forced)`.
  */
 export function textTrackLabel(track: Partial<ShakaTrack>, uiLanguage?: string): string {
-  const label = baseLabel(track, uiLanguage);
+  const label = baseLabel(track, uiLanguage)
 
   if (track.forced && !/forced/i.test(label)) {
-    return `${label} (forced)`;
+    return `${label} (forced)`
   }
 
-  return label;
+  return label
 }
 
 /**
@@ -156,19 +157,19 @@ export function textTrackLabel(track: Partial<ShakaTrack>, uiLanguage?: string):
  *         `English (5.1)`.
  */
 export function audioTrackLabel(track: Partial<ShakaTrack>, uiLanguage?: string): string {
-  const label = baseLabel(track, uiLanguage);
-  const extras = (track.roles || []).filter((role) => role && role !== 'main');
-  const layout = channelLayout(track.channelsCount);
+  const label = baseLabel(track, uiLanguage)
+  const extras = (track.roles || []).filter((role) => role && role !== 'main')
+  const layout = channelLayout(track.channelsCount)
 
   if (layout) {
-    extras.push(layout);
+    extras.push(layout)
   }
 
   if (!extras.length) {
-    return label;
+    return label
   }
 
-  return `${label} (${extras.join(', ')})`;
+  return `${label} (${extras.join(', ')})`
 }
 
 /**
@@ -181,7 +182,7 @@ export function audioTrackLabel(track: Partial<ShakaTrack>, uiLanguage?: string)
  *         The player's language, defaulting to `en`.
  */
 export function uiLanguageOf(tech: Shaka): string {
-  const player = tech && typeof tech.getPlayer_ === 'function' ? tech.getPlayer_() : null;
+  const player = tech && typeof tech.getPlayer_ === 'function' ? tech.getPlayer_() : null
 
-  return (player && player.language && player.language()) || 'en';
+  return (player && player.language && player.language()) || 'en'
 }

@@ -1,11 +1,11 @@
 declare module 'global/window' {
-  const window: Window & typeof globalThis & {shaka?: import('./types').ShakaNamespace};
+  const window: Window & typeof globalThis & {shaka?: import('./types').ShakaNamespace}
 
-  export default window;
+  export default window
 }
 
 declare module 'global/document' {
-  const document: Document;
+  const document: Document
 
-  export default document;
+  export default document
 }
