@@ -1,8 +1,8 @@
-import videojs from 'video.js';
+import type Player from 'video.js/dist/types/player';
+import {MenuButton as VjsButton} from '../videojs-classes';
+import type {QualityEntry, QualitySwitchCallback} from '../types';
 import QualityMenu from './quality-menu';
 import QualityMenuItem from './quality-menu-item';
-
-const VjsButton = videojs.getComponent('MenuButton') as any;
 
 const TRACK_CLASS: Record<string, string> = {
   video: 'vjs-icon-hd',
@@ -10,9 +10,16 @@ const TRACK_CLASS: Record<string, string> = {
   subtitle: 'vjs-icon-subtitles'
 };
 
+export interface QualityPickerButtonOptions {
+  name: string;
+  qualityList: QualityEntry[];
+  qualitySwitchCallback: QualitySwitchCallback;
+  trackType: string;
+}
+
 class QualityPickerButton extends VjsButton {
 
-  constructor(player: any, options: unknown) {
+  constructor(player: Player, options: QualityPickerButtonOptions) {
     super(player, options);
   }
 

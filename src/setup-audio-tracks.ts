@@ -1,6 +1,7 @@
 import videojs from 'video.js';
 import {audioTrackLabel, uiLanguageOf} from './track-label';
 import type {ShakaPlayer, ShakaTrack} from './types';
+import type Shaka from './shaka';
 
 /**
  * Shaka Player reports one audio track per audio stream, so a language that is
@@ -53,7 +54,7 @@ export function dedupeAudioTracks(tracks: ShakaTrack[], uiLanguage?: string): Sh
  * @param {shaka.extern.AudioTrack[]} tracks
  *        The audio tracks reported by shaka player.
  */
-function handleAudioTracksAdded(tech: any, shakaPlayer: ShakaPlayer, tracks: ShakaTrack[]): void {
+function handleAudioTracksAdded(tech: Shaka, shakaPlayer: ShakaPlayer, tracks: ShakaTrack[]): void {
 
   const videojsAudioTracks = tech.audioTracks();
   const uiLanguage = uiLanguageOf(tech);
@@ -126,6 +127,6 @@ function handleAudioTracksAdded(tech: any, shakaPlayer: ShakaPlayer, tracks: Sha
  * @param {shaka.Player} shakaPlayer
  *        The shaka player instance.
  */
-export default function setupAudioTracks(tech: any, shakaPlayer: ShakaPlayer): void {
+export default function setupAudioTracks(tech: Shaka, shakaPlayer: ShakaPlayer): void {
   handleAudioTracksAdded(tech, shakaPlayer, dedupeAudioTracks(shakaPlayer.getAudioTracks(), uiLanguageOf(tech)));
 }

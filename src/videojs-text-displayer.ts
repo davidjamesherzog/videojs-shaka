@@ -1,5 +1,6 @@
 import window from 'global/window';
 import type {ShakaCue, ShakaTextDisplayer, ShakaTextTrackEntry, ShakaTrack} from './types';
+import type Shaka from './shaka';
 
 /**
  * Flatten a shaka cue (which may be a tree of nested cues carrying styling)
@@ -59,7 +60,7 @@ function cuesOf(track: TextTrack | null | undefined): VTTCue[] {
  */
 class VideojsTextDisplayer implements ShakaTextDisplayer {
 
-  private tech_: any;
+  private tech_: Shaka | null;
 
   private visible_: boolean;
 
@@ -70,7 +71,7 @@ class VideojsTextDisplayer implements ShakaTextDisplayer {
    *        The `Shaka` tech. Its `shakaTextTracks_` array, maintained by
    *        `setupTextTracks`, maps shaka text tracks to video.js text tracks.
    */
-  constructor(tech: any) {
+  constructor(tech: Shaka) {
     this.tech_ = tech;
     this.visible_ = false;
   }

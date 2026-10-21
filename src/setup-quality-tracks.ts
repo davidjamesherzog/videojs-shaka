@@ -1,4 +1,5 @@
 import type {QualityEntry, ShakaAbrConfiguration, ShakaPlayer, ShakaRestrictions, ShakaTrack} from './types';
+import type Shaka from './shaka';
 
 /**
  * Label a video height, e.g. `1080p (HD)`.
@@ -248,7 +249,7 @@ export function pickVariantForBandwidth(
  * @param {shaka.Player} shakaPlayer
  *        The shaka player instance.
  */
-export default function setupQualityTracks(tech: any, shakaPlayer: ShakaPlayer): void {
+export default function setupQualityTracks(tech: Shaka, shakaPlayer: ShakaPlayer): void {
 
   tech.trigger('loadedqualitydata', {
     qualityData: {

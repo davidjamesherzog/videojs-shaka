@@ -1,5 +1,6 @@
 import {textTrackLabel, uiLanguageOf} from './track-label';
 import type {ShakaPlayer, ShakaTextTrackEntry, ShakaTrack} from './types';
+import type Shaka from './shaka';
 
 /**
  * Select a shaka text track, or hide text entirely when `track` is falsy.
@@ -43,7 +44,7 @@ function selectShakaTextTrack(shakaPlayer: ShakaPlayer, track: ShakaTrack | null
  *
  * @private
  */
-function attachShakaTextTracksToVideojs(tech: any, shakaPlayer: ShakaPlayer, tracks: ShakaTrack[]): any[] {
+function attachShakaTextTracksToVideojs(tech: Shaka, shakaPlayer: ShakaPlayer, tracks: ShakaTrack[]): HTMLTrackElement[] {
 
   // also read by `VideojsTextDisplayer` to find the track that receives cues
   const trackDictionary: ShakaTextTrackEntry[] = tech.shakaTextTracks_ = [];
@@ -125,14 +126,14 @@ function attachShakaTextTracksToVideojs(tech: any, shakaPlayer: ShakaPlayer, tra
  * @param {shaka.Player} shakaPlayer
  *        The shaka player instance.
  */
-export default function setupTextTracks(tech: any, shakaPlayer: ShakaPlayer): void {
+export default function setupTextTracks(tech: Shaka, shakaPlayer: ShakaPlayer): void {
 
   // Store the tracks that we've added so we can remove them later.
-  let shakaTracksAttachedToVideoJs: any[] = [];
+  let shakaTracksAttachedToVideoJs: HTMLTrackElement[] = [];
 
   // Clear the tracks that we added. We don't clear them all because someone else can add tracks.
   function clearShakaTracks() {
-    shakaTracksAttachedToVideoJs.forEach(tech.removeRemoteTextTrack.bind(tech));
+    shakaTracksAttachedToVideoJs.forEach((trackEl) => tech.removeRemoteTextTrack(trackEl.track));
 
     shakaTracksAttachedToVideoJs = [];
     tech.shakaTextTracks_ = [];

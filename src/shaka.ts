@@ -4,11 +4,14 @@ import setupQualityTracks from './setup-quality-tracks';
 import setupTextTracks from './setup-text-tracks';
 import setupAudioTracks from './setup-audio-tracks';
 import VideojsTextDisplayer from './videojs-text-displayer';
+import {Html5} from './videojs-classes';
 import {version as VERSION} from '../package.json';
-import type {ShakaConfiguration, ShakaError, ShakaPlayer, ShakaTextDisplayer} from './types';
+import type MediaError from 'video.js/dist/types/media-error';
+import type Player from 'video.js/dist/types/player';
+import type AudioTrackList from 'video.js/dist/types/tracks/audio-track-list';
+import type TextTrackList from 'video.js/dist/types/tracks/text-track-list';
+import type {ShakaError, ShakaPlayer, ShakaTechConfiguration, ShakaTechOptions, ShakaTextDisplayFactory, ShakaTextTrackEntry, VjsAudioTrack} from './types';
 
-// the video.js typings describe `getTech` as returning an instance, not the class
-const Html5 = videojs.getTech('Html5') as any;
 
 // mime types that shaka player can play
 const SHAKA_TYPE_RE = /^(application\/dash\+xml|application\/x-mpegurl|application\/vnd\.apple\.mpegurl)$/i;
@@ -25,7 +28,7 @@ const IGNORED_SHAKA_ERROR_CODES = [7000];
  */
 class Shaka extends Html5 {
 
-  static defaultState: Record<string, unknown>;
+  static defaultState: Record<string, never>;
 
   static VERSION: string;
 
@@ -37,13 +40,20 @@ class Shaka extends Html5 {
 
   el_!: HTMLMediaElement & {tech?: Shaka};
 
-  options_!: Record<string, any>;
+  options_!: ShakaTechOptions;
+
+  shakaTextTracks_?: ShakaTextTrackEntry[];
+
+  // created by video.js when the tech is constructed, but missing from its typings
+  audioTracks!: () => AudioTrackList & {[index: number]: VjsAudioTrack};
+
+  textTracks!: () => TextTrackList & {[index: number]: TextTrack};
 
   shaka_!: ShakaPlayer | null;
 
   shakaReady_!: Promise<void>;
 
-  textDisplayFactory_!: (shakaPlayer?: ShakaPlayer) => ShakaTextDisplayer;
+  textDisplayFactory_!: ShakaTextDisplayFactory;
 
   requestFilterRegistered_?: boolean;
 
@@ -58,7 +68,7 @@ class Shaka extends Html5 {
    * @param {Function} ready
    *        Callback function to call when the `Shaka` Tech is ready.
    */
-  constructor(options: Record<string, any>, ready: () => void) {
+  constructor(options: ShakaTechOptions, ready: () => void) {
     super(options, ready);
 
     this.ready(() => {
@@ -78,14 +88,14 @@ class Shaka extends Html5 {
    *
    * @private
    */
-  getPlayer_(): any {
+  getPlayer_(): Player | null {
     // `options_` is cleared once the tech is disposed, but shaka may still
     // emit events while it finishes tearing down
     if (!this.options_) {
       return null;
     }
 
-    return videojs.getPlayer(this.options_.playerId);
+    return videojs.getPlayer(this.options_.playerId as string) || null;
   }
 
   /**
@@ -97,7 +107,7 @@ class Shaka extends Html5 {
   createEl(): Element {
     const shaka = window.shaka as NonNullable<typeof window.shaka>;
 
-    this.el_ = Html5.prototype.createEl.apply(this, arguments);
+    this.el_ = Html5.prototype.createEl.call(this) as HTMLMediaElement;
 
     // Install built-in polyfills to patch browser incompatibilities.
     shaka.polyfill.installAll();
@@ -118,7 +128,7 @@ class Shaka extends Html5 {
     // The factory has to be in place before `attach()` creates shaka's media
     // source engine, and it has to keep the same identity across
     // `configure()` calls, otherwise shaka rebuilds the displayer.
-    const configuration: ShakaConfiguration = this.options_.configuration || {};
+    const configuration: ShakaTechConfiguration = this.options_.configuration || {};
 
     this.textDisplayFactory_ = configuration.textDisplayFactory ||
       ((shakaPlayer?: ShakaPlayer) => new VideojsTextDisplayer(this));
@@ -170,7 +180,7 @@ class Shaka extends Html5 {
    *        The mime type of the manifest, e.g. `application/dash+xml`.
    */
   setSrc(src: string, type?: string): void {
-    const shakaOptions: ShakaConfiguration = this.options_.configuration || {};
+    const shakaOptions: ShakaTechConfiguration = this.options_.configuration || {};
 
     if (typeof shakaOptions.drm === 'function') {
       shakaOptions.drm = shakaOptions.drm();
@@ -295,10 +305,11 @@ class Shaka extends Html5 {
     const player = this.getPlayer_();
 
     if (player) {
+      // video.js wraps the plain object in a `MediaError`, but its typings only accept an instance
       player.error({
         code,
         message: `${error.code} - ${error.message || ''}`.trim()
-      });
+      } as MediaError);
     }
 
     // unload shaka player in 10ms async, so that the rest of the

@@ -5,21 +5,41 @@ import QUnit from 'qunit';
 import sinon from 'sinon';
 import videojs from 'video.js';
 
+import type Player from 'video.js/dist/types/player';
+
 import plugin from '../src/plugin';
+import {version as VERSION} from '../package.json';
+import type {QualityData, ShakaErrorStatic, ShakaNamespace, ShakaTrack} from '../src/types';
 import {dedupeAudioTracks} from '../src/setup-audio-tracks';
 import VideojsTextDisplayer, {cueToText} from '../src/videojs-text-displayer';
 import {isMeaningfulLabel, languageDisplayName, textTrackLabel, audioTrackLabel} from '../src/track-label';
 import {buildQualityList, pickVariantForHeight, pickVariantForBandwidth} from '../src/setup-quality-tracks';
 
-// the shaka player typings are a clutz generated global that is not worth modelling in tests
-const shaka: any = (window as any).shaka;
+const shaka = window.shaka as ShakaNamespace & {util: {Error: ShakaErrorStatic}};
+
 interface TestContext {
   fixture: HTMLElement;
   video: HTMLVideoElement;
-  player: any;
+  player: Player;
 }
 
-const Player: any = videojs.getComponent('Player');
+const PlayerClass = videojs.getComponent('Player');
+
+// fill in the fields that a test does not care about
+const makeTrack = (track: Partial<ShakaTrack>): ShakaTrack => Object.assign({
+  id: 0,
+  active: false,
+  type: 'variant',
+  bandwidth: 0,
+  language: 'en',
+  label: null,
+  kind: null,
+  width: null,
+  height: null,
+  frameRate: null,
+  channelsCount: 2
+}, track);
+
 const DASH_SOURCE = {
   type: 'application/dash+xml',
   src: 'https://example.com/manifest.mpd'
@@ -49,12 +69,10 @@ QUnit.module('videojs-shaka', {
 });
 
 QUnit.test('registers itself with video.js', function(this: TestContext, assert) {
-  const shakaTech = videojs.getTech('Shaka') as any;
-
-  assert.strictEqual(shakaTech, plugin, 'the Shaka tech was registered');
-  assert.strictEqual(plugin.VERSION, shakaTech.VERSION, 'the tech exposes a version');
+  assert.ok(Object.is(videojs.getTech('Shaka'), plugin), 'the Shaka tech was registered');
+  assert.strictEqual(plugin.VERSION, VERSION, 'the tech exposes a version');
   assert.strictEqual(
-    typeof Player.prototype.qualityPickerPlugin,
+    typeof (PlayerClass.prototype as Player & {qualityPickerPlugin?: Function}).qualityPickerPlugin,
     'function',
     'the quality picker plugin was registered'
   );
@@ -83,7 +101,7 @@ QUnit.test('loads DASH sources through shaka player', function(this: TestContext
     assert.ok(this.player.tech_.shaka_ instanceof shaka.Player, 'a shaka player was created');
     assert.ok(this.player.hasClass('vjs-shaka'), 'the tech adds a class to the player');
 
-    this.player.tech_.one('loadedqualitydata', (event: unknown, {qualityData}: {qualityData: any}) => {
+    this.player.tech_.one('loadedqualitydata', (event: Event, {qualityData}: {qualityData: QualityData}) => {
       assert.ok(load.calledOnce, 'shaka player load was called once');
       assert.deepEqual(
         load.firstCall.args,
@@ -114,8 +132,8 @@ QUnit.test('surfaces critical shaka errors on the player', function(this: TestCo
   this.player.one('error', () => {
     const error = this.player.error();
 
-    assert.strictEqual(error.code, 2, 'network errors map to MEDIA_ERR_NETWORK');
-    assert.ok(error.message.indexOf(String(shakaError.code)) === 0, 'the message carries the shaka error code');
+    assert.strictEqual(error?.code, 2, 'network errors map to MEDIA_ERR_NETWORK');
+    assert.ok(error?.message.indexOf(String(shakaError.code)) === 0, 'the message carries the shaka error code');
     done();
   });
 
@@ -131,7 +149,7 @@ QUnit.test('ignores recoverable shaka errors', function(this: TestContext, asser
   );
 
   sinon.stub(shaka.Player.prototype, 'load').rejects(shakaError);
-  sinon.stub(videojs.log, 'warn');
+  const warn = sinon.stub(videojs.log, 'warn');
 
   this.player.src(DASH_SOURCE);
 
@@ -139,7 +157,7 @@ QUnit.test('ignores recoverable shaka errors', function(this: TestContext, asser
     // the load rejection is handled asynchronously
     this.player.tech_.shakaReady_.then(() => Promise.resolve()).then(() => Promise.resolve()).then(() => {
       assert.strictEqual(this.player.error(), null, 'no error was set on the player');
-      assert.ok((videojs.log.warn as any).called, 'the recoverable error was logged');
+      assert.ok(warn.called, 'the recoverable error was logged');
       done();
     });
   });
@@ -148,7 +166,7 @@ QUnit.test('ignores recoverable shaka errors', function(this: TestContext, asser
 QUnit.module('videojs-shaka track helpers');
 
 QUnit.test('dedupeAudioTracks collapses codec variants of the same language', function(this: TestContext, assert) {
-  const tracks: any[] = [
+  const tracks = [
     {language: 'es', roles: [], label: null, codecs: 'mp4a.40.2', channelsCount: 2, active: false},
     {language: 'en', roles: ['main'], label: null, codecs: 'mp4a.40.2', channelsCount: 2, active: false},
     {language: 'es', roles: [], label: null, codecs: 'opus', channelsCount: 2, active: true},
@@ -157,7 +175,7 @@ QUnit.test('dedupeAudioTracks collapses codec variants of the same language', fu
     {language: 'en', roles: [], label: 'stream_6', codecs: 'mp4a.40.2', channelsCount: 6, active: false},
     {language: 'en', roles: [], label: 'stream_7', codecs: 'mp4a.40.2', channelsCount: 2, active: false}
   ];
-  const deduped = dedupeAudioTracks(tracks, 'en');
+  const deduped = dedupeAudioTracks(tracks.map(makeTrack), 'en');
 
   assert.strictEqual(deduped.length, 4, 'one entry per language/roles/channel layout');
   assert.strictEqual(deduped[0].codecs, 'opus', 'the active stream wins for a language');
@@ -254,9 +272,9 @@ QUnit.test('feeds cues to the mirrored video.js track', function(this: TestConte
 });
 
 QUnit.test('quality list has one entry per height across audio tracks', function(this: TestContext, assert) {
-  const variant = (id: number, height: number, bandwidth: number, language: string, audioId?: number, extra?: object): any =>
-    Object.assign({id, type: 'variant', height, bandwidth, language, audioId, videoCodec: 'avc1', audioCodec: 'mp4a', channelsCount: 2, audioRoles: [], active: false}, extra);
-  const variants: any[] = [
+  const variant = (id: number, height: number, bandwidth: number, language: string, audioId?: number, extra?: Partial<ShakaTrack>): ShakaTrack =>
+    makeTrack(Object.assign({id, type: 'variant', height, bandwidth, language, audioId, videoCodec: 'avc1', audioCodec: 'mp4a', channelsCount: 2, audioRoles: [], active: false}, extra));
+  const variants = [
     variant(1, 576, 2000, 'en', 10),
     variant(2, 360, 800, 'en', 10),
     variant(3, 576, 2100, 'de', 11),
@@ -264,7 +282,7 @@ QUnit.test('quality list has one entry per height across audio tracks', function
     variant(5, 576, 2500, 'en', 12, {channelsCount: 6}),
     variant(6, 360, 1300, 'en', 12, {channelsCount: 6}),
     variant(7, 360, 1000, 'en', 10, {videoCodec: 'hvc1'}),
-    {id: 99, type: 'variant', height: null, bandwidth: 100, language: 'en'}
+    makeTrack({id: 99, height: null, bandwidth: 100})
   ];
   const list = buildQualityList(variants);
 
@@ -285,7 +303,7 @@ QUnit.test('quality list has one entry per height across audio tracks', function
 
   variants.forEach((v) => {
     v.active = false;
-    delete v.audioId;
+    v.audioId = undefined;
   });
   variants[2].active = true;
   assert.strictEqual(pickVariantForHeight(variants, 360)?.id, 4, 'language, roles and channels are used when shaka reports no audio id');
@@ -294,9 +312,9 @@ QUnit.test('quality list has one entry per height across audio tracks', function
 });
 
 QUnit.test('going back to auto picks the quality the bandwidth allows', function(this: TestContext, assert) {
-  const variant = (id: number, height: number, bandwidth: number, audioId?: number, extra?: object): any =>
-    Object.assign({id, type: 'variant', height, width: height * 16 / 9, bandwidth, language: 'en', audioId, channelsCount: 2, audioRoles: [], active: false}, extra);
-  const variants: any[] = [
+  const variant = (id: number, height: number, bandwidth: number, audioId?: number, extra?: Partial<ShakaTrack>): ShakaTrack =>
+    makeTrack(Object.assign({id, type: 'variant', height, width: height * 16 / 9, bandwidth, language: 'en', audioId, channelsCount: 2, audioRoles: [], active: false}, extra));
+  const variants = [
     variant(1, 1080, 5000000, 10),
     variant(2, 720, 3000000, 10),
     variant(3, 360, 1000000, 10),

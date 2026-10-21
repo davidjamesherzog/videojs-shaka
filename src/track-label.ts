@@ -1,5 +1,6 @@
 import window from 'global/window';
 import type {ShakaTrack} from './types';
+import type Shaka from './shaka';
 
 // labels that packagers generate automatically and that mean nothing to a viewer,
 // e.g. `stream_0`, `audio-2`, `track 3`, `subtitles`
@@ -55,9 +56,9 @@ export function languageDisplayName(language: string, uiLanguage = 'en'): string
     return '';
   }
 
-  if ((window.Intl as any) && typeof (window.Intl as any).DisplayNames === 'function') {
+  if (window.Intl && typeof window.Intl.DisplayNames === 'function') {
     try {
-      const displayNames = new (window.Intl as any).DisplayNames([uiLanguage, 'en'], {type: 'language'});
+      const displayNames = new window.Intl.DisplayNames([uiLanguage, 'en'], {type: 'language'});
       const name = displayNames.of(language);
 
       if (name && name.toLowerCase() !== String(language).toLowerCase()) {
@@ -179,7 +180,7 @@ export function audioTrackLabel(track: Partial<ShakaTrack>, uiLanguage?: string)
  * @return {string}
  *         The player's language, defaulting to `en`.
  */
-export function uiLanguageOf(tech: any): string {
+export function uiLanguageOf(tech: Shaka): string {
   const player = tech && typeof tech.getPlayer_ === 'function' ? tech.getPlayer_() : null;
 
   return (player && player.language && player.language()) || 'en';

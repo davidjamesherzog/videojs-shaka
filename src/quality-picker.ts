@@ -1,4 +1,5 @@
 import type Player from 'video.js/dist/types/player';
+import type ControlBar from 'video.js/dist/types/control-bar/control-bar';
 import QualityPickerButton from './quality/quality-picker-button';
 import type {QualityData, QualitySwitchCallback} from './types';
 
@@ -7,9 +8,8 @@ interface LoadedQualityData {
   qualitySwitchCallback: QualitySwitchCallback;
 }
 
-export default function qualityPickerPlugin(this: Player) {
-  // the video.js typings do not expose `tech_` or `controlBar` children by name
-  const player = this as any;
+export default function qualityPickerPlugin(this: Player & {controlBar: ControlBar}) {
+  const player = this;
 
   const SUPPORTED_TRACKS = ['video', 'audio', 'subtitle'] as const;
 
@@ -22,10 +22,12 @@ export default function qualityPickerPlugin(this: Player) {
     }, true);
   }
 
-  function onQualityData(event: unknown, {qualityData, qualitySwitchCallback}: LoadedQualityData) {
+  function onQualityData(event: Event, {qualityData, qualitySwitchCallback}: LoadedQualityData) {
     const fullscreenToggle = player.controlBar.getChild('fullscreenToggle');
 
-    player.controlBar.removeChild(fullscreenToggle);
+    if (fullscreenToggle) {
+      player.controlBar.removeChild(fullscreenToggle);
+    }
 
     for (let i = 0; i < SUPPORTED_TRACKS.length; i++) {
       const track = SUPPORTED_TRACKS[i];
