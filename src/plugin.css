@@ -10,7 +10,6 @@
  */
 
 .video-js {
-
   &.vjs-shaka {
     /* This class is added to the video.js element by the plugin by default. */
     display: block;

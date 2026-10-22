@@ -1,6 +1,6 @@
-import window from 'global/window';
-import type {ShakaCue, ShakaTextDisplayer, ShakaTextTrackEntry, ShakaTrack} from './types';
-import type Shaka from './shaka';
+import window from 'global/window'
+import type Shaka from './shaka'
+import type {ShakaCue, ShakaTextDisplayer, ShakaTextTrackEntry, ShakaTrack} from './types'
 
 /**
  * Flatten a shaka cue (which may be a tree of nested cues carrying styling)
@@ -14,14 +14,14 @@ import type Shaka from './shaka';
  */
 export function cueToText(cue: Partial<ShakaCue>): string {
   if (cue.lineBreak) {
-    return '\n';
+    return '\n'
   }
 
   if (cue.nestedCues && cue.nestedCues.length) {
-    return cue.nestedCues.map(cueToText).join('');
+    return cue.nestedCues.map(cueToText).join('')
   }
 
-  return cue.payload || '';
+  return cue.payload || ''
 }
 
 /**
@@ -34,19 +34,19 @@ export function cueToText(cue: Partial<ShakaCue>): string {
  *         The cues, or an empty array when the track exposes none.
  */
 function cuesOf(track: TextTrack | null | undefined): VTTCue[] {
-  const cues = track && track.cues;
+  const cues = track && track.cues
 
   if (!cues) {
-    return [];
+    return []
   }
 
-  const result: VTTCue[] = [];
+  const result: VTTCue[] = []
 
   for (let i = 0; i < cues.length; i++) {
-    result.push(cues[i] as VTTCue);
+    result.push(cues[i] as VTTCue)
   }
 
-  return result;
+  return result
 }
 
 /**
@@ -59,10 +59,9 @@ function cuesOf(track: TextTrack | null | undefined): VTTCue[] {
  * @implements {shaka.extern.TextDisplayer}
  */
 class VideojsTextDisplayer implements ShakaTextDisplayer {
+  private tech_: Shaka | null
 
-  private tech_: Shaka | null;
-
-  private visible_: boolean;
+  private visible_: boolean
 
   /**
    * Create a displayer for a tech.
@@ -72,8 +71,8 @@ class VideojsTextDisplayer implements ShakaTextDisplayer {
    *        `setupTextTracks`, maps shaka text tracks to video.js text tracks.
    */
   constructor(tech: Shaka) {
-    this.tech_ = tech;
-    this.visible_ = false;
+    this.tech_ = tech
+    this.visible_ = false
   }
 
   /**
@@ -86,22 +85,25 @@ class VideojsTextDisplayer implements ShakaTextDisplayer {
    * @private
    */
   getActiveTrack_(): TextTrack | null {
-    const tech = this.tech_;
+    const tech = this.tech_
 
     if (!tech || !tech.shaka_ || !tech.shakaTextTracks_) {
-      return null;
+      return null
     }
 
-    const activeShakaTrack = tech.shaka_.getTextTracks().find((track: ShakaTrack) => track.active);
+    const activeShakaTrack = tech.shaka_.getTextTracks().find((track: ShakaTrack) => track.active)
 
     if (!activeShakaTrack) {
-      return null;
+      return null
     }
 
-    const match = tech.shakaTextTracks_.find(({shakaTrack}: ShakaTextTrackEntry) => shakaTrack.id === activeShakaTrack.id) ||
-      tech.shakaTextTracks_.find(({shakaTrack}: ShakaTextTrackEntry) => shakaTrack.language === activeShakaTrack.language);
+    const match =
+      tech.shakaTextTracks_.find(({shakaTrack}: ShakaTextTrackEntry) => shakaTrack.id === activeShakaTrack.id) ||
+      tech.shakaTextTracks_.find(
+        ({shakaTrack}: ShakaTextTrackEntry) => shakaTrack.language === activeShakaTrack.language
+      )
 
-    return match ? match.textTrack : null;
+    return match ? match.textTrack : null
   }
 
   /**
@@ -117,39 +119,40 @@ class VideojsTextDisplayer implements ShakaTextDisplayer {
    *        The cues shaka player has buffered.
    */
   append(cues: ShakaCue[]): void {
-    const track = this.getActiveTrack_();
+    const track = this.getActiveTrack_()
 
     if (!track) {
-      return;
+      return
     }
 
     // a native track only exposes its cues while it is not disabled
     if (track.mode === 'disabled') {
-      track.mode = 'hidden';
+      track.mode = 'hidden'
     }
 
-    const Cue = (window.VTTCue || window.TextTrackCue) as typeof VTTCue;
-    const existing = cuesOf(track);
+    const Cue = (window.VTTCue || window.TextTrackCue) as typeof VTTCue
+    const existing = cuesOf(track)
 
     cues.forEach((cue) => {
-      const text = cueToText(cue);
+      const text = cueToText(cue)
 
       if (!text.trim() || cue.endTime <= cue.startTime) {
-        return;
+        return
       }
 
-      const duplicate = existing.some((c) =>
-        c.startTime === cue.startTime && c.endTime === cue.endTime && c.text === text);
+      const duplicate = existing.some(
+        (c) => c.startTime === cue.startTime && c.endTime === cue.endTime && c.text === text
+      )
 
       if (duplicate) {
-        return;
+        return
       }
 
-      const vttCue = new Cue(cue.startTime, cue.endTime, text);
+      const vttCue = new Cue(cue.startTime, cue.endTime, text)
 
-      existing.push(vttCue);
-      track.addCue(vttCue);
-    });
+      existing.push(vttCue)
+      track.addCue(vttCue)
+    })
   }
 
   /**
@@ -166,21 +169,21 @@ class VideojsTextDisplayer implements ShakaTextDisplayer {
    *         Always `true`, as required by the interface.
    */
   remove(startTime: number, endTime: number): boolean {
-    const tech = this.tech_;
+    const tech = this.tech_
 
     if (!tech || !tech.shakaTextTracks_) {
-      return true;
+      return true
     }
 
     tech.shakaTextTracks_.forEach(({textTrack}: ShakaTextTrackEntry) => {
       cuesOf(textTrack).forEach((cue) => {
         if (cue.startTime < endTime && cue.endTime > startTime) {
-          textTrack.removeCue(cue);
+          textTrack.removeCue(cue)
         }
-      });
-    });
+      })
+    })
 
-    return true;
+    return true
   }
 
   /**
@@ -194,13 +197,13 @@ class VideojsTextDisplayer implements ShakaTextDisplayer {
    *         Whether one of the plugin's video.js text tracks is showing.
    */
   isTextVisible(): boolean {
-    const tech = this.tech_;
+    const tech = this.tech_
 
     if (tech && tech.shakaTextTracks_ && tech.shakaTextTracks_.length) {
-      return tech.shakaTextTracks_.some(({textTrack}: ShakaTextTrackEntry) => textTrack.mode === 'showing');
+      return tech.shakaTextTracks_.some(({textTrack}: ShakaTextTrackEntry) => textTrack.mode === 'showing')
     }
 
-    return this.visible_;
+    return this.visible_
   }
 
   /**
@@ -210,7 +213,7 @@ class VideojsTextDisplayer implements ShakaTextDisplayer {
    *        Whether text should be visible.
    */
   setTextVisibility(on: boolean): void {
-    this.visible_ = on;
+    this.visible_ = on
   }
 
   /**
@@ -226,11 +229,11 @@ class VideojsTextDisplayer implements ShakaTextDisplayer {
    *         Resolves once destroyed.
    */
   destroy(): Promise<void> {
-    this.remove(0, Infinity);
-    this.tech_ = null;
+    this.remove(0, Infinity)
+    this.tech_ = null
 
-    return Promise.resolve();
+    return Promise.resolve()
   }
 }
 
-export default VideojsTextDisplayer;
+export default VideojsTextDisplayer

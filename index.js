@@ -16,33 +16,37 @@ const player = videojs('videojs-shaka-player', {
       }
     }
   }
-});
+})
 
-player.qualityPickerPlugin();
-player.src([{
-  type: 'application/dash+xml',
-  src: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd'
-  // src: 'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-wvtt/dash.mpd'
-  // src: 'https://storage.googleapis.com/shaka-demo-assets/angel-one-hls/hls.m3u8'
-  // src: 'https://storage.googleapis.com/shaka-demo-assets/bbb-dark-truths-hls/hls.m3u8'
-}]);
+player.qualityPickerPlugin()
+player.src([
+  {
+    type: 'application/dash+xml',
+    src: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd'
+    // src: 'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-wvtt/dash.mpd'
+    // src: 'https://storage.googleapis.com/shaka-demo-assets/angel-one-hls/hls.m3u8'
+    // src: 'https://storage.googleapis.com/shaka-demo-assets/bbb-dark-truths-hls/hls.m3u8'
+  }
+])
 
-const stream = document.getElementById('stream');
-const play = document.getElementById('play');
+const stream = document.getElementById('stream')
+const play = document.getElementById('play')
 
-play.addEventListener('click', function() {
-  let type = 'application/dash+xml';
+play.addEventListener('click', () => {
+  let type = 'application/dash+xml'
 
   if (stream.value.indexOf('m3u8') > -1) {
-    type = 'application/x-mpegURL';
+    type = 'application/x-mpegURL'
   } else if (stream.value.indexOf('mp4') > -1) {
     // this will resort back to the html5 tech
-    type = 'video/mp4';
+    type = 'video/mp4'
   }
-  player.reset();
-  player.qualityPickerPlugin();
-  player.src([{
-    type,
-    src: stream.value
-  }]);
-});
+  player.reset()
+  player.qualityPickerPlugin()
+  player.src([
+    {
+      type,
+      src: stream.value
+    }
+  ])
+})

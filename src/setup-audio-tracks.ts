@@ -1,7 +1,7 @@
-import videojs from 'video.js';
-import {audioTrackLabel, uiLanguageOf} from './track-label';
-import type {ShakaPlayer, ShakaTrack} from './types';
-import type Shaka from './shaka';
+import videojs from 'video.js'
+import type Shaka from './shaka'
+import {audioTrackLabel, uiLanguageOf} from './track-label'
+import type {ShakaPlayer, ShakaTrack} from './types'
 
 /**
  * Shaka Player reports one audio track per audio stream, so a language that is
@@ -20,23 +20,23 @@ import type Shaka from './shaka';
  *         One track per distinct choice.
  */
 export function dedupeAudioTracks(tracks: ShakaTrack[], uiLanguage?: string): ShakaTrack[] {
-  const byKey: Record<string, number> = {};
-  const result: ShakaTrack[] = [];
+  const byKey: Record<string, number> = {}
+  const result: ShakaTrack[] = []
 
   tracks.forEach((track) => {
     // the label already folds in language, non-default roles and channel layout
-    const key = [track.language, audioTrackLabel(track, uiLanguage)].join('|');
-    const existingIndex = byKey[key];
+    const key = [track.language, audioTrackLabel(track, uiLanguage)].join('|')
+    const existingIndex = byKey[key]
 
     if (existingIndex === undefined) {
-      byKey[key] = result.length;
-      result.push(track);
+      byKey[key] = result.length
+      result.push(track)
     } else if (track.active && !result[existingIndex].active) {
-      result[existingIndex] = track;
+      result[existingIndex] = track
     }
-  });
+  })
 
-  return result;
+  return result
 }
 
 /**
@@ -55,67 +55,68 @@ export function dedupeAudioTracks(tracks: ShakaTrack[], uiLanguage?: string): Sh
  *        The audio tracks reported by shaka player.
  */
 function handleAudioTracksAdded(tech: Shaka, shakaPlayer: ShakaPlayer, tracks: ShakaTrack[]): void {
-
-  const videojsAudioTracks = tech.audioTracks();
-  const uiLanguage = uiLanguageOf(tech);
+  const videojsAudioTracks = tech.audioTracks()
+  const uiLanguage = uiLanguageOf(tech)
 
   // Safari creates a single native `AudioTrack` (not `videojs.AudioTrack`) when loading. Clear all
   // automatically generated audio tracks so we can create them all ourself.
   if (videojsAudioTracks.length) {
-    tech.clearTracks(['audio']);
+    tech.clearTracks(['audio'])
   }
 
-  const currentAudioTrack = tracks.find((track) => track.active) || tracks[0];
+  const currentAudioTrack = tracks.find((track) => track.active) || tracks[0]
 
   // map the video.js track id back to the shaka track it was created from
-  const trackDictionary: Record<string, ShakaTrack> = {};
+  const trackDictionary: Record<string, ShakaTrack> = {}
 
   tracks.forEach((shakaTrack, index) => {
-    const id = `shaka-audio-${index}`;
-    const enabled = shakaTrack === currentAudioTrack;
+    const id = `shaka-audio-${index}`
+    const enabled = shakaTrack === currentAudioTrack
 
-    trackDictionary[id] = shakaTrack;
+    trackDictionary[id] = shakaTrack
 
     if (enabled) {
       tech.trigger('shakaaudiotrackchange', {
         language: shakaTrack.language
-      });
+      })
     }
 
     // Add the track to the player's audio track list.
-    videojsAudioTracks.addTrack(new videojs.AudioTrack({
-      enabled,
-      id,
-      kind: 'main',
-      label: audioTrackLabel(shakaTrack, uiLanguage),
-      language: shakaTrack.language
-    }));
-  });
+    videojsAudioTracks.addTrack(
+      new videojs.AudioTrack({
+        enabled,
+        id,
+        kind: 'main',
+        label: audioTrackLabel(shakaTrack, uiLanguage),
+        language: shakaTrack.language
+      })
+    )
+  })
 
   const audioTracksChangeHandler = () => {
     for (let i = 0; i < videojsAudioTracks.length; i++) {
-      const track = videojsAudioTracks[i];
+      const track = videojsAudioTracks[i]
 
       if (!track.enabled) {
-        continue;
+        continue
       }
 
       // Find the shaka track that matches the video.js track we just selected
-      const shakaTrack = trackDictionary[track.id];
+      const shakaTrack = trackDictionary[track.id]
 
       if (shakaTrack && !shakaTrack.active) {
         tech.trigger('shakaaudiotrackchange', {
           language: shakaTrack.language
-        });
-        shakaPlayer.selectAudioTrack(shakaTrack);
+        })
+        shakaPlayer.selectAudioTrack(shakaTrack)
       }
     }
-  };
+  }
 
-  videojsAudioTracks.addEventListener('change', audioTracksChangeHandler);
+  videojsAudioTracks.addEventListener('change', audioTracksChangeHandler)
   shakaPlayer.addEventListener('unloading', () => {
-    videojsAudioTracks.removeEventListener('change', audioTracksChangeHandler);
-  });
+    videojsAudioTracks.removeEventListener('change', audioTracksChangeHandler)
+  })
 }
 
 /**
@@ -128,5 +129,5 @@ function handleAudioTracksAdded(tech: Shaka, shakaPlayer: ShakaPlayer, tracks: S
  *        The shaka player instance.
  */
 export default function setupAudioTracks(tech: Shaka, shakaPlayer: ShakaPlayer): void {
-  handleAudioTracksAdded(tech, shakaPlayer, dedupeAudioTracks(shakaPlayer.getAudioTracks(), uiLanguageOf(tech)));
+  handleAudioTracksAdded(tech, shakaPlayer, dedupeAudioTracks(shakaPlayer.getAudioTracks(), uiLanguageOf(tech)))
 }

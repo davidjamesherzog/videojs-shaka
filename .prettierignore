@@ -1,0 +1,9 @@
+dist
+docs
+test/dist
+node_modules
+package-lock.json
+CHANGELOG.md
+*.md
+index.html
+.claude
